@@ -3,15 +3,32 @@ import Message from "./components/Message";
 import Channel from "./components/Channel";
 import Server from "./components/Server";
 import Profile from "./components/Profile";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
+import axios from "axios";
 
 export default function Home() {
   const [showProfile, setShowProfile] = useState(false)
   const [mouseY, setMouseY] = useState(0)
   const [profileId, setProfileId] = useState(0)
-  const profile = useRef(null)
   const [isAdvButttonsEnabled, setIsAdvButttonsEnabled] = useState(false)
+  const [chatId, setChatId] = useState(0)
+  const [messages, setMessages] = useState([])
+  const [profileData, setProfileData] = useState({})
+
+  useEffect(() => {
+    const fetchMsgs = async () => {
+      try {
+        const response = (await axios.get("./api/fetchMessages"));
+        setMessages(response.data);
+        console.log(response.data);
+      } catch (error) {
+        setMessages([]);
+        console.error('Msg fetch error - ', error);
+      }
+    };
+    fetchMsgs();
+  }, []);
 
   const handleMouseMove = (event) => {
     if (showProfile) {
@@ -20,10 +37,23 @@ export default function Home() {
     setMouseY(event.clientY);
   }
 
-  const handleProfileOpen = (userid : number) => {
-    setShowProfile(true)
-    setProfileId(userid)
+  const handleFetchProfile = async (userid : number) => {
+    try {
+      const response = (await axios.post("./api/fetchProfileById", { id: userid }));
+      console.log(response.data);
+      setProfileData(response.data[0]);
+    }
+    catch (error) {
+      console.error('Profile fetch error - ', error);
+    }
   }
+
+  const handleProfileOpen = (userid : number) => {
+    setShowProfile(true);
+    setProfileId(userid);
+    handleFetchProfile(userid);
+    console.log("open profile");
+  };
 
   const handleProfileClose = () => {
     setShowProfile(false)
@@ -31,7 +61,14 @@ export default function Home() {
 
   return (
     <div className="h-screen flex" onMouseMove={handleMouseMove}>
-      <Profile id={profileId} show={showProfile} mouseY={mouseY} closeProfile={handleProfileClose}/>
+      <Profile 
+        id={profileId}
+        name={profileData['name']}
+        tag={profileData['tag']}
+        bio={profileData['bio']}
+        show={showProfile} 
+        mouseY={mouseY} 
+        closeProfile={handleProfileClose}/>
       <div className="w-20 bg-zinc-600">
         <Server name="ServerName"></Server>
         <Server name="Second server"></Server>
@@ -44,8 +81,20 @@ export default function Home() {
       <div className="w-8/12 lg:w-10/12 bg-zinc-600 shadow-2xl flex flex-col rounded-t-lg">
         <h1 className="text-2xl text-white text-center font-bold bg-zinc-600 w-full h-[6%] shadow-lg rounded-md">ChatName</h1>
         <div className="h-[87%] mr-4 ml-4 overflow-scroll">
-          <Message content="Сложно сказать, почему непосредственные участники технического прогресса объявлены нарушающими общечеловеческие нормы этики и морали!" author="Someone" date={new Date(1707037200000)} id="0" onProfileOpen={() => handleProfileOpen(0)}/>
-          <Message content="Разнообразный и богатый опыт говорит нам, что сплочённость команды профессионалов однозначно фиксирует необходимость глубокомысленных рассуждений." author="Fish" date={new Date(1707037200000)} id="1" onProfileOpen={() => handleProfileOpen(1)} />
+          {messages ? (
+            messages.map((message) => (
+            <Message
+              id={message.id}
+              content={message.content}
+              author={message.author}
+              date={new Date(message.date)}
+              openProfile={() => handleProfileOpen(message.authorid)}
+              key={message.id}
+            />
+            ))
+            ) : (
+            <p className="text-zinc-500 absolute pt-8 font-semibold bottom-1/4 text-xl left-[52%] ">No messages to display :(</p>
+          )}
         </div>
         <div className="h-[6%] mb-[1%] flex bg-zinc-600">
           <input
