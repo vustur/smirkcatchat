@@ -12,23 +12,60 @@ export default function Home() {
   const [mouseY, setMouseY] = useState(0)
   const [profileId, setProfileId] = useState(0)
   const [isAdvButttonsEnabled, setIsAdvButttonsEnabled] = useState(false)
-  const [chatId, setChatId] = useState(0)
   const [messages, setMessages] = useState([])
   const [profileData, setProfileData] = useState({})
+  const [currChannelId, setCurrChannelId] = useState(1)
+  const [channels, setChannels] = useState([])
+  const [currServerId, setCurrServerId] = useState(1)
+  const [servers, setServers] = useState([])
+  const [isMsgsLoading, setIsMsgsLoading] = useState(false)
+  const [isChannelsLoading, setIsChannelsLoading] = useState(false)
 
   useEffect(() => {
-    const fetchMsgs = async () => {
-      try {
-        const response = (await axios.get("./api/fetchMessages"));
-        setMessages(response.data);
-        console.log(response.data);
-      } catch (error) {
-        setMessages([]);
-        console.error('Msg fetch error - ', error);
-      }
-    };
-    fetchMsgs();
-  }, []);
+  const fetchMsgs = async () => {
+    try {
+      setIsMsgsLoading(true)
+      const response = await axios.post("./api/fetchMessages", { id: currChannelId });
+      setMessages(response.data);
+      console.log(response.data);
+    } catch (error) {
+      setMessages(null);
+      console.error('Msg fetch error - ', error);
+    }
+    setIsMsgsLoading(false)
+  };
+  fetchMsgs();
+}, [currChannelId]);
+
+useEffect(() => {
+  const fetchChannels = async () => {
+    try {
+      setIsChannelsLoading(true)
+      const response = await axios.post("./api/fetchChannels", { id: currServerId });
+      setChannels(response.data);
+      console.log(response.data);
+    } catch (error) {
+      setChannels(null);
+      console.error('Channel fetch error - ', error);
+    }
+    setIsChannelsLoading(false)
+  };
+  fetchChannels();
+}, [currServerId]);
+
+useEffect(() => {
+  const fetchServers = async () => {
+    try {
+      const response = await axios.get("./api/fetchServers");
+      setServers(response.data);
+      console.log(response.data);
+    } catch (error) {
+      setServers(null);
+      console.error('Server fetch error - ', error);
+    }
+  };
+  fetchServers();
+}, [currServerId]);
 
   const handleMouseMove = (event) => {
     if (showProfile) {
@@ -70,18 +107,41 @@ export default function Home() {
         mouseY={mouseY} 
         closeProfile={handleProfileClose}/>
       <div className="w-20 bg-zinc-600">
-        <Server name="ServerName"></Server>
-        <Server name="Second server"></Server>
+        {servers ? (
+          servers.map((server) => (
+          <Server
+            name={server.name}
+            id={server.serverid}
+            key={server.serverid}
+            onSwitch={() => setCurrServerId(server.serverid)}
+          />
+          ))
+          ) : (
+          <p className="text-zinc-500 absolute pt-8 font-semibold bottom-1/4 text-xl left-[10%] text-center select-none">No servers... join or create one!</p>
+        )
+        }
       </div>
       <div className="mt-3 w-4/12 lg:w-2/12 bg-zinc-700 shadow-2xl flex flex-col">
-        <Channel name="ChatName"></Channel>
-        <Channel name="Additional"></Channel>
-        <Channel name="Another one"></Channel>
+        {channels && channels.length > 0 && !isChannelsLoading ? (
+          channels.map((channel) => (
+          <Channel
+            name={channel.name}
+            id={channel.id}
+            key={channel.id}
+            onSwitch={() => setCurrChannelId(channel.id)}
+          />
+          ))
+          ) : isChannelsLoading ? (
+            <p className="text-zinc-500 pt-8 font-semibold bottom-1/4 text-xl text-center select-none">Loading channels...</p>
+          ) : (
+          <p className="text-zinc-500 pt-8 font-semibold bottom-1/4 text-xl text-center select-none">No channels to display? <br></br>Weird...</p>
+        )
+        }
       </div>
       <div className="w-8/12 lg:w-10/12 bg-zinc-600 shadow-2xl flex flex-col rounded-t-lg">
         <h1 className="text-2xl text-white text-center font-bold bg-zinc-600 w-full h-[6%] shadow-lg rounded-md">ChatName</h1>
         <div className="h-[87%] mr-4 ml-4 overflow-scroll">
-          {messages ? (
+          {messages && messages.length > 0 && !isMsgsLoading ? (
             messages.map((message) => (
             <Message
               id={message.id}
@@ -92,8 +152,12 @@ export default function Home() {
               key={message.id}
             />
             ))
+            ) : isMsgsLoading ? (  
+              <p className="text-zinc-500 mx-auto my-60 h-8 pt-8 font-semibold text-center bottom-1/4 text-2xl left-[52%] select-none">Loading messages...</p>
+            ) : messages.length === 0 ? (
+            <p className="text-zinc-500 mx-auto my-60 h-8 pt-8 font-semibold text-center bottom-1/4 text-2xl left-[52%] select-none">This channel is empty? <br></br><span className="text-sm">uh, u can be first...</span></p>
             ) : (
-            <p className="text-zinc-500 absolute pt-8 font-semibold bottom-1/4 text-xl left-[52%] ">No messages to display :(</p>
+            <p className="text-zinc-500 mx-auto my-60 h-8 pt-8 font-semibold text-center bottom-1/4 text-2xl left-[52%] select-none">Error ocured!<br></br>Unable to display messages :(</p>
           )}
         </div>
         <div className="h-[6%] mb-[1%] flex bg-zinc-600">

@@ -3,7 +3,8 @@ import axios from 'axios';
 
 export default async function handler(req: Request, res: Response) {
   try {
-    const msgs = await dbPost("SELECT * FROM messages WHERE channelid = ?", 1);
+    const id = req.body.id
+    const msgs = await dbPost("SELECT * FROM messages WHERE channelid = ?", id);
     const messagesWithAuthors = await Promise.all(
       msgs.map(async (msg) => {
         try {
