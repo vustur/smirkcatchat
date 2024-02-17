@@ -1,11 +1,20 @@
 import dbPost from "./conn";
 
 export default async function handler(req: Request, res: Response) {
-  const id = req.body.id
-  var msg = null;
-  await dbPost("SELECT name, tag, bio, id FROM users WHERE id = ?", id)
-    .then((data) => {
-      msg = data;
-    })
-  res.status(200).json(msg);
+  try {
+    const id = req.body.id
+    var profileData = null;
+    await dbPost("SELECT name, tag, bio, id FROM users WHERE id = ?", id)
+      .then((data) => {
+        profileData = data;
+      })
+    if (profileData.length === 0) {
+      throw new Error("Profile not found");
+    }
+    res.status(200).json({'result': "success", 'profile': profileData[0]});
+  }
+  catch (error) {
+    res.status(500).json({ 'result': error });
+  }
+
 }

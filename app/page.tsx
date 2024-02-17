@@ -6,6 +6,7 @@ import Profile from "./components/Profile";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import axios from "axios";
+import Cookies from 'js-cookie'
 
 export default function Home() {
   const [showProfile, setShowProfile] = useState(false)
@@ -20,6 +21,46 @@ export default function Home() {
   const [servers, setServers] = useState([])
   const [isMsgsLoading, setIsMsgsLoading] = useState(false)
   const [isChannelsLoading, setIsChannelsLoading] = useState(false)
+  const [selfName, setSelfName] = useState("")
+  const [selfTag, setSelfTag] = useState("")
+
+  const token = Cookies.get('token')
+
+  useEffect(() => {
+    if (token) {
+      console.log("token exists! Its " + token)
+    }
+    else {
+      document.location = "/login";
+    }
+    const fetchSelf = async () => {
+      try {
+        const response1 = await axios.post("./api/fetchIdByToken", { token: token });
+        console.log('succ fetchSelf(tokentoid):');
+        console.log(response1.data);
+        if (response1.data['result'] != "success"){
+          throw new Error(response1.data['result']);
+        }
+        const response = await axios.post("./api/fetchProfileById", { id: response1.data['id'] });
+        if (response.data['result'] === "success"){
+          console.log('succ fetchSelf(login):');
+          console.log(response.data);
+          setSelfName(response.data['profile']['name']);
+          setSelfTag (response.data['profile']['tag']);
+          alert("Welcome back " + response.data['profile']['name'] + " " + response.data['profile']['tag']);
+        }
+        else {
+          throw new Error(response.data['result']);
+        }
+      }
+      catch (error) {
+        console.error('Profile fetch error - ', error);
+        alert("Login failed - " + error + ". Going back to login 😿");
+        document.location = "/login";
+      }
+    }
+    fetchSelf();
+  }, [token]);
 
   useEffect(() => {
   const fetchMsgs = async () => {
@@ -27,6 +68,7 @@ export default function Home() {
       setIsMsgsLoading(true)
       const response = await axios.post("./api/fetchMessages", { id: currChannelId });
       setMessages(response.data);
+      console.log('succ fetchMsgs:');
       console.log(response.data);
     } catch (error) {
       setMessages(null);
@@ -43,6 +85,7 @@ useEffect(() => {
       setIsChannelsLoading(true)
       const response = await axios.post("./api/fetchChannels", { id: currServerId });
       setChannels(response.data);
+      console.log('succ fetchChannels:');
       console.log(response.data);
     } catch (error) {
       setChannels(null);
@@ -58,6 +101,7 @@ useEffect(() => {
     try {
       const response = await axios.get("./api/fetchServers");
       setServers(response.data);
+      console.log('succ fetchServers:');
       console.log(response.data);
     } catch (error) {
       setServers(null);
@@ -77,8 +121,9 @@ useEffect(() => {
   const handleFetchProfile = async (userid : number) => {
     try {
       const response = (await axios.post("./api/fetchProfileById", { id: userid }));
+      console.log('succ fetchProfileById:');
       console.log(response.data);
-      setProfileData(response.data[0]);
+      setProfileData(response.data['profile']);
     }
     catch (error) {
       console.error('Profile fetch error - ', error);
@@ -89,7 +134,7 @@ useEffect(() => {
     setShowProfile(true);
     setProfileId(userid);
     handleFetchProfile(userid);
-    console.log("open profile");
+    // console.log("open profile");
   };
 
   const handleProfileClose = () => {
@@ -178,8 +223,8 @@ useEffect(() => {
         <div className="w-full h-full bg-gradient-to-r from-zinc-600 to-zinc-700 shadow-lg flex flex-row">
         { !isAdvButttonsEnabled 
         ? ( <div className="w-2/5 h-full mt-1">
-            <h1 className="text-xl text-white font-semibold ml-2 -mb-1">Usename</h1>
-            <h1 className="text-sm text-zinc-200 ml-2">@username</h1>
+            <h1 className="text-xl text-white font-semibold ml-2 -mb-1">{selfName}</h1>
+            <h1 className="text-sm text-zinc-200 ml-2">@{selfTag}</h1>
           </div>
         )
         : null
