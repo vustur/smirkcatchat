@@ -7,6 +7,8 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import axios from "axios";
 import Cookies from 'js-cookie'
+import io from "socket.io-client";
+let chatsocket
 
 export default function Home() {
   const [showProfile, setShowProfile] = useState(false)
@@ -23,6 +25,7 @@ export default function Home() {
   const [isChannelsLoading, setIsChannelsLoading] = useState(false)
   const [selfName, setSelfName] = useState("")
   const [selfTag, setSelfTag] = useState("")
+  const [msgInput, setMsgInput] = useState("")
 
   const token = Cookies.get('token')
 
@@ -47,7 +50,6 @@ export default function Home() {
           console.log(response.data);
           setSelfName(response.data['profile']['name']);
           setSelfTag (response.data['profile']['tag']);
-          alert("Welcome back " + response.data['profile']['name'] + " " + response.data['profile']['tag']);
         }
         else {
           throw new Error(response.data['result']);
@@ -77,7 +79,27 @@ export default function Home() {
     setIsMsgsLoading(false)
   };
   fetchMsgs();
-}, [currChannelId]);
+  }, [currChannelId]);
+
+  useEffect(() => {
+    const connSocket = async () => {
+      await axios.get("./api/websocket")
+      chatsocket = io();
+  
+      chatsocket.on("connect", () => {
+        console.log("[socket] connected to socket");
+      });
+
+      chatsocket.on("receiveMsg", (msg) => {
+        console.log("[socket] newMessage:");
+        console.log(msg);
+        if (parseInt(msg['channelid']) === parseInt(currChannelId)) {
+          setMessages((prevMessages) => [...prevMessages, msg]);
+        }
+      })
+    }
+    connSocket();
+  }, [])
 
 useEffect(() => {
   const fetchChannels = async () => {
@@ -139,6 +161,19 @@ useEffect(() => {
 
   const handleProfileClose = () => {
     setShowProfile(false)
+  }
+
+  const handleSendMsg = async (e) => {
+    if (e.key === "Enter" && msgInput.length > 0) {
+      e.preventDefault();
+      try {
+        chatsocket.emit("sendMsg", { channelid: currChannelId, content: msgInput, token: token });
+        console.log('succ sendMsg:');
+      } catch (error) {
+        console.error('Send msg error - ', error);
+      }
+      setMsgInput("");
+    }
   }
 
   return (
@@ -207,24 +242,27 @@ useEffect(() => {
         </div>
         <div className="h-[6%] mb-[1%] flex bg-zinc-600">
           <input
-            className="h-full flex-grow bg-zinc-500 rounded-lg ml-5 pl-2 text-white"
+            onChange={(e) => setMsgInput(e.target.value)}
+            className="h-full flex-grow bg-zinc-500 rounded-lg mx-5 pl-2 text-white"
             type="text"
             placeholder="Введите сообщение..."
+            value={msgInput}
+            onKeyDown={(e) => handleSendMsg(e)}
           />
-          <button
+          {/* <button
             className="h-full w-10 ml-2 mr-2 bg-zinc-500 rounded-lg text-white p-1"
             type="button"
           >
             <Image src="/icons/send.svg" width={35} height={35} alt="send message" ></Image>
-          </button>
+          </button> */}
         </div>
       </div>
       <div className="absolute w-[calc(41.6666%)] md:w-[calc(33.3333%+3rem)] lg:w-[calc(16.7777%+3.75rem)] bottom-0 left-0 h-14">
         <div className="w-full h-full bg-gradient-to-r from-zinc-600 to-zinc-700 shadow-lg flex flex-row">
         { !isAdvButttonsEnabled 
         ? ( <div className="w-2/5 h-full mt-1">
-            <h1 className="text-xl text-white font-semibold ml-2 -mb-1">{selfName}</h1>
-            <h1 className="text-sm text-zinc-200 ml-2">@{selfTag}</h1>
+            <h1 className="text-xl text-white font-semibold ml-2 -mb-1">{ selfName ? selfName : "Loading..." }</h1>
+            <h1 className="text-sm text-zinc-200 ml-2">{selfTag ? "@" +selfTag : null }</h1>
           </div>
         )
         : null
