@@ -70,6 +70,11 @@ export default function Home() {
       setIsMsgsLoading(true)
       const response = await axios.post("./api/fetchMessages", { id: currChannelId });
       setMessages(response.data);
+      const msgElement = document.getElementById('messages');
+      if (msgElement) {
+        // goofy fix BUT WORKS!! 🔥🔥🔥
+        setTimeout(() => { msgElement.scrollTo({ top: msgElement.scrollHeight, behavior: 'smooth' }); }, 100);
+      }
       console.log('succ fetchMsgs:');
       console.log(response.data);
     } catch (error) {
@@ -95,6 +100,10 @@ export default function Home() {
         console.log(msg);
         if (parseInt(msg['channelid']) === parseInt(currChannelId)) {
           setMessages((prevMessages) => [...prevMessages, msg]);
+          const msgElement = document.getElementById('messages');
+          if (msgElement) {
+            setTimeout(() => { msgElement.scrollTo({ top: msgElement.scrollHeight, behavior: 'smooth' }); }, 100);
+          }
         }
       })
     }
@@ -220,7 +229,7 @@ useEffect(() => {
       </div>
       <div className="w-8/12 lg:w-10/12 bg-zinc-600 shadow-2xl flex flex-col rounded-t-lg">
         <h1 className="text-2xl text-white text-center font-bold bg-zinc-600 w-full h-[6%] shadow-lg rounded-md">ChatName</h1>
-        <div className="h-[87%] mr-4 ml-4 overflow-scroll">
+        <div className="h-[87%] mr-4 ml-4 overflow-scroll mb-4" id="messages">
           {messages && messages.length > 0 && !isMsgsLoading ? (
             messages.map((message) => (
             <Message
