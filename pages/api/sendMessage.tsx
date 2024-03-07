@@ -1,5 +1,6 @@
 import dbPost from "./conn";
 import axios, { Axios } from "axios";
+import { NextApiResponse as Response, NextApiRequest as Request } from "next";
 
 export default async function handler(req: Request, res: Response) {
     try {
@@ -16,6 +17,6 @@ export default async function handler(req: Request, res: Response) {
         res.status(200).json({ "result": "success", "msg": msg });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ "result": error.message });
+        res.status(500).json({ "result": error });
     }
 }

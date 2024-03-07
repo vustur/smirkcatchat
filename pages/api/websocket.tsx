@@ -2,12 +2,13 @@ import { Socket } from "socket.io-client";
 import dbPost from "./conn";
 import { Server } from "socket.io";
 import axios from "axios";
+import { NextApiResponse as Response, NextApiRequest as Request } from "next";
 
 export default async function handler(req: Request, res: Response) {
-    if (!res.socket.server.io) {
+    if (!(res.socket as any)?.server.io) {
         console.log('Setting up socket !');
-        const io = new Server(res.socket.server);
-        res.socket.server.io = io;
+        const io = new Server((res.socket as any)?.server);
+        (res.socket as any).server.io = io;
 
         io.on('connection', (socket) => {
             console.log('New client connected');

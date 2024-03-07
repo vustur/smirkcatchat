@@ -1,4 +1,5 @@
 import dbPost from "./conn";
+import { NextApiResponse as Response, NextApiRequest as Request } from "next";
 
 export default async function handler(req: Request, res: Response) {
   const id = req.body.id

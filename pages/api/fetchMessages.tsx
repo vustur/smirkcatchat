@@ -1,11 +1,12 @@
 import dbPost from "./conn";
 import axios from 'axios';
+import { NextApiResponse as Response, NextApiRequest as Request } from "next";
 
 export default async function handler(req: Request, res: Response) {
   try {
     const id = req.body.id
-    const msgs = await dbPost("SELECT * FROM messages WHERE channelid = ?", id);
-    let knownNames = {} // 1 : 'fishyy', 2 : 'catto' etc
+    const msgs = await dbPost("SELECT * FROM messages WHERE channelid = ?", id) as any[];
+    let knownNames = {} as any // 1 : 'fishyy', 2 : 'catto' etc
     const messagesWithAuthors = await Promise.all(
       msgs.map(async (msg) => {
         try {

@@ -3,12 +3,12 @@ import Message from "./components/Message";
 import Channel from "./components/Channel";
 import Server from "./components/Server";
 import Profile from "./components/Profile";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, SetStateAction } from "react";
 import Image from "next/image";
 import axios from "axios";
 import Cookies from 'js-cookie'
 import io from "socket.io-client";
-let chatsocket
+let chatsocket: any = null
 
 export default function Home() {
   const [showProfile, setShowProfile] = useState(false)
@@ -16,7 +16,7 @@ export default function Home() {
   const [profileId, setProfileId] = useState(0)
   const [isAdvButttonsEnabled, setIsAdvButttonsEnabled] = useState(false)
   const [messages, setMessages] = useState([])
-  const [profileData, setProfileData] = useState({})
+  const [profileData, setProfileData] = useState({ name: "", tag: "", bio: "" })
   const [currChannelId, setCurrChannelId] = useState(1)
   const [channels, setChannels] = useState([])
   const [currServerId, setCurrServerId] = useState(1)
@@ -78,7 +78,7 @@ export default function Home() {
       console.log('succ fetchMsgs:');
       console.log(response.data);
     } catch (error) {
-      setMessages(null);
+      setMessages([]);
       console.error('Msg fetch error - ', error);
     }
     setIsMsgsLoading(false)
@@ -95,11 +95,13 @@ export default function Home() {
         console.log("[socket] connected to socket");
       });
 
-      chatsocket.on("receiveMsg", (msg) => {
+      chatsocket.on("receiveMsg", (msg: any) => {
         console.log("[socket] newMessage:");
         console.log(msg);
-        if (parseInt(msg['channelid']) === parseInt(currChannelId)) {
-          setMessages((prevMessages) => [...prevMessages, msg]);
+        if (parseInt(msg['channelid']) === currChannelId) {
+          setMessages((prevMessages) => {
+            return [...prevMessages, msg] as SetStateAction<any>;
+          });
           const msgElement = document.getElementById('messages');
           if (msgElement) {
             setTimeout(() => { msgElement.scrollTo({ top: msgElement.scrollHeight, behavior: 'smooth' }); }, 100);
@@ -119,7 +121,7 @@ useEffect(() => {
       console.log('succ fetchChannels:');
       console.log(response.data);
     } catch (error) {
-      setChannels(null);
+      setChannels([]);
       console.error('Channel fetch error - ', error);
     }
     setIsChannelsLoading(false)
@@ -135,14 +137,14 @@ useEffect(() => {
       console.log('succ fetchServers:');
       console.log(response.data);
     } catch (error) {
-      setServers(null);
+      setServers([]);
       console.error('Server fetch error - ', error);
     }
   };
   fetchServers();
 }, [currServerId]);
 
-  const handleMouseMove = (event) => {
+  const handleMouseMove = (event: any) => {
     if (showProfile) {
       return
     }
@@ -151,10 +153,14 @@ useEffect(() => {
 
   const handleFetchProfile = async (userid : number) => {
     try {
-      const response = (await axios.post("./api/fetchProfileById", { id: userid }));
+      const response = await axios.post("./api/fetchProfileById", { id: userid });
       console.log('succ fetchProfileById:');
       console.log(response.data);
-      setProfileData(response.data['profile']);
+      setProfileData(response.data['profile'] as {
+        name: string;
+        tag: string;
+        bio: string;
+      });
     }
     catch (error) {
       console.error('Profile fetch error - ', error);
@@ -165,14 +171,14 @@ useEffect(() => {
     setShowProfile(true);
     setProfileId(userid);
     handleFetchProfile(userid);
-    // console.log("open profile");
+    console.log("open profile");
   };
 
   const handleProfileClose = () => {
     setShowProfile(false)
   }
 
-  const handleSendMsg = async (e) => {
+  const handleSendMsg = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && msgInput.length > 0) {
       e.preventDefault();
       try {
@@ -187,7 +193,7 @@ useEffect(() => {
 
   return (
     <div className="h-screen flex" onMouseMove={handleMouseMove}>
-      <Profile 
+      <Profile
         id={profileId}
         name={profileData['name']}
         tag={profileData['tag']}
@@ -199,10 +205,10 @@ useEffect(() => {
         {servers ? (
           servers.map((server) => (
           <Server
-            name={server.name}
-            id={server.serverid}
-            key={server.serverid}
-            onSwitch={() => setCurrServerId(server.serverid)}
+            name={server['name']}
+            //id={server['serverid']}
+            key={server['serverid']}
+            onSwitch={() => setCurrServerId(server['serverid'])}
           />
           ))
           ) : (
@@ -212,14 +218,15 @@ useEffect(() => {
       </div>
       <div className="mt-3 w-4/12 lg:w-2/12 bg-zinc-700 shadow-2xl flex flex-col">
         {channels && channels.length > 0 && !isChannelsLoading ? (
-          channels.map((channel) => (
-          <Channel
-            name={channel.name}
-            id={channel.id}
-            key={channel.id}
-            onSwitch={() => setCurrChannelId(channel.id)}
-          />
-          ))
+          channels.map((channel) => {
+            return (
+              <Channel
+                name={channel['name']}
+                // id={channel['id']}
+                key={channel['id']}
+                onSwitch={() => setCurrChannelId(channel['id'])} />
+            );
+          })
           ) : isChannelsLoading ? (
             <p className="text-zinc-500 pt-8 font-semibold bottom-1/4 text-xl text-center select-none">Loading channels...</p>
           ) : (
@@ -233,12 +240,12 @@ useEffect(() => {
           {messages && messages.length > 0 && !isMsgsLoading ? (
             messages.map((message) => (
             <Message
-              id={message.id}
-              content={message.content}
-              author={message.author}
-              date={new Date(message.date)}
-              openProfile={() => handleProfileOpen(message.authorid)}
-              key={message.id}
+              id={message['id']}
+              content={message['content']}
+              author={message['author']}
+              date={new Date(message['date'])}
+              openProfile={() => handleProfileOpen(message['authorid'])}
+              key={message['id']}
             />
             ))
             ) : isMsgsLoading ? (  

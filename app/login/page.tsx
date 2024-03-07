@@ -11,7 +11,7 @@ export default function Login() {
     const [username, setUsername] = useState("");
     const [errLabel, setErrLabel] = useState("");
 
-    const onLogin = async (e) => {
+    const onLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log("login")
         try {
@@ -25,13 +25,13 @@ export default function Login() {
                 throw new Error("Login failed - " + response.data['result']);
             }
         }
-        catch (error) {
+        catch (error: any) {
             console.error('Login error - ', error);
             setErrLabel(error.message);
         }
     }
 
-    const onReg = async (e) => {
+    const onReg = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log("reg")
         try {
@@ -45,7 +45,7 @@ export default function Login() {
                 throw new Error("Register failed - " + response.data['result']);
             }
         }
-        catch (error) {
+        catch (error: any) {
             console.error('Reg error - ', error);
             setErrLabel(error.message);
         }
