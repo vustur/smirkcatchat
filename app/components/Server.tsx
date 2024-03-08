@@ -1,5 +1,4 @@
 import Image from "next/image"
-import PlaceholderImage from "./imgs/placeholder.png"
 
 type Props = {
     name: string
@@ -9,8 +8,8 @@ type Props = {
 export default ({ name, onSwitch }: Props) => {
     return (
         <button className="mx-auto block mt-3">
-            <Image 
-                src={PlaceholderImage}
+            <Image
+                src="/imgs/placeholder.png"
                 width={54} 
                 height={54} 
                 alt={name}

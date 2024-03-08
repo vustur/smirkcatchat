@@ -3,7 +3,8 @@ import Message from "./components/Message";
 import Channel from "./components/Channel";
 import Server from "./components/Server";
 import Profile from "./components/Profile";
-import React, { useState, useEffect, useRef, useMemo, SetStateAction } from "react";
+import Settings from "./components/Settings";
+import React, { useState, useEffect, SetStateAction } from "react";
 import Image from "next/image";
 import axios from "axios";
 import Cookies from 'js-cookie'
@@ -18,6 +19,7 @@ export default function Home() {
   const [messages, setMessages] = useState([])
   const [profileData, setProfileData] = useState({ name: "", tag: "", bio: "" })
   const [currChannelId, setCurrChannelId] = useState(1)
+  const [currChannelName, setCurrChannelName] = useState("chat")
   const [channels, setChannels] = useState([])
   const [currServerId, setCurrServerId] = useState(1)
   const [servers, setServers] = useState([])
@@ -26,6 +28,8 @@ export default function Home() {
   const [selfName, setSelfName] = useState("")
   const [selfTag, setSelfTag] = useState("")
   const [msgInput, setMsgInput] = useState("")
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [msgsOffset, setMsgsOffset] = useState(0)
 
   const token = Cookies.get('token')
 
@@ -191,6 +195,11 @@ useEffect(() => {
     }
   }
 
+  const handleLogout = () => {
+    Cookies.remove('token');
+    document.location = "/login";
+  }
+
   return (
     <div className="h-screen flex" onMouseMove={handleMouseMove}>
       <Profile
@@ -224,7 +233,7 @@ useEffect(() => {
                 name={channel['name']}
                 // id={channel['id']}
                 key={channel['id']}
-                onSwitch={() => setCurrChannelId(channel['id'])} />
+                onSwitch={() => {setCurrChannelId(channel['id']); setCurrChannelName(channel['name'])}} />
             );
           })
           ) : isChannelsLoading ? (
@@ -235,7 +244,7 @@ useEffect(() => {
         }
       </div>
       <div className="w-8/12 lg:w-10/12 bg-zinc-600 shadow-2xl flex flex-col rounded-t-lg">
-        <h1 className="text-2xl text-white text-center font-bold bg-zinc-600 w-full h-[6%] shadow-lg rounded-md">ChatName</h1>
+        <h1 className="text-2xl text-white text-center font-bold bg-zinc-600 w-full h-[6%] shadow-lg rounded-md">{currChannelName}</h1>
         <div className="h-[87%] mr-4 ml-4 overflow-scroll mb-4" id="messages">
           {messages && messages.length > 0 && !isMsgsLoading ? (
             messages.map((message) => (
@@ -285,7 +294,7 @@ useEffect(() => {
         }
           <div className={`w-${isAdvButttonsEnabled ? 'full' : '3/5'} w-full h-full mt-2 flex flex-row-reverse mr-2`}>
             <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1">
-              <Image src="/icons/settings.svg" width={30} height={30} alt="settings"></Image>
+              <Image src="/icons/settings.svg" width={30} height={30} alt="settings" onClick={() => setIsSettingsOpen(true)}></Image>
             </button>
             <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
             onClick={() => setIsAdvButttonsEnabled(!isAdvButttonsEnabled)}
@@ -298,7 +307,10 @@ useEffect(() => {
           { isAdvButttonsEnabled 
           ? ( /* эво глупо но JSX expression allows only one element!! */
             <div className="h-full w-max flex flex-row">
-              <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1">
+              <button 
+                className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
+                onClick={() => handleLogout()}
+                >
                 <Image src="/icons/door.svg" width={30} height={30} alt="plus" ></Image>
               </button>
               <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1">
@@ -315,6 +327,7 @@ useEffect(() => {
           </div>
         </div>
       </div>
+      <Settings isEnabled={isSettingsOpen} username={selfName} tag={selfTag} handleClose={() => setIsSettingsOpen(false)}></Settings>
     </div>
   );
 }

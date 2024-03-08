@@ -15,7 +15,7 @@ export default async function handler(req: Request, res: Response) {
     res.status(200).json({'result': "success", 'profile': profileData[0]});
   }
   catch (error) {
-    res.status(500).json({ 'result': error });
+    res.status(500).json({ 'result': error.message });
   }
 
 }
