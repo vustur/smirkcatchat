@@ -30,7 +30,6 @@ export default function Home() {
   const [selfBio, setSelfBio] = useState("")
   const [msgInput, setMsgInput] = useState("")
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [msgsOffset, setMsgsOffset] = useState(0)
 
   const token = Cookies.get('token')
 
@@ -70,27 +69,40 @@ export default function Home() {
     fetchSelf();
   }, [token]);
 
-  useEffect(() => {
-  const fetchMsgs = async () => {
+  
+  const fetchMsgs = async (msgsOffset: number) => {
+    console.log("load messages with offset " + msgsOffset + " ! ");
     try {
-      setMsgsOffset(0);
       setIsMsgsLoading(true)
       const response = await axios.post("./api/fetchMessages", { id: currChannelId, offset: msgsOffset });
-      setMessages(response.data);
-      const msgElement = document.getElementById('messages');
-      if (msgElement) {
-        // goofy fix BUT WORKS!! 🔥🔥🔥
-        setTimeout(() => { msgElement.scrollTo({ top: msgElement.scrollHeight, behavior: 'smooth' }); }, 100);
-      }
+      let newMessages = response.data.map((msg: { date: string, author: string, content: string }) => ({
+        date: new Date(msg.date),
+        author: msg.author,
+        content: msg.content,
+        authorid: msg.authorid,
+        id: msg.id,
+        channelid: msg.channelid
+      }));
+      setMessages((prevMessages) => [...newMessages, ...prevMessages]);
       console.log('succ fetchMsgs:');
       console.log(response.data);
+      if (msgsOffset === 0) {
+        const msgElement = document.getElementById('messages');
+        if (msgElement) {
+          // goofy fix BUT WORKS!! 🔥🔥🔥
+          setTimeout(() => { msgElement.scrollTo({ top: msgElement.scrollHeight, behavior: 'smooth' }); }, 100);
+        }
+      }
     } catch (error) {
       setMessages([]);
       console.error('Msg fetch error - ', error);
     }
     setIsMsgsLoading(false)
   };
-  fetchMsgs();
+  useEffect(() => {
+    setMessages([])
+    console.log("load msgs from channel " + currChannelId);
+    setTimeout(() => { fetchMsgs(0); }, 1000);
   }, [currChannelId]);
 
   useEffect(() => {
@@ -206,31 +218,6 @@ useEffect(() => {
     }
   }
 
-  const handleLoadMoreMsgs = async () => {
-    setMsgsOffset(msgsOffset + 10) // TODO: fix strange start from 0 offset
-    console.log("load more messages with offset " + msgsOffset + " ! ");
-    try {
-      setIsMsgsLoading(true)
-      const response = await axios.post("./api/fetchMessages", { id: currChannelId, offset: msgsOffset });
-      let newMessages = response.data.map((msg: { date: string, author: string, content: string }) => ({
-        date: new Date(msg.date),
-        author: msg.author,
-        content: msg.content,
-        authorid: msg.authorid,
-        id: msg.id,
-        channelid: msg.channelid
-      }));
-      setMessages((prevMessages) => [...newMessages, ...prevMessages]);
-      console.log('succ fetchMsgs (loadmore func):');
-      console.log(response.data);
-      console.log(messages)
-    } catch (error) {
-      setMessages([]);
-      console.error('Msg fetch error - ', error);
-    }
-    setIsMsgsLoading(false)
-  }
-
   const handleLogout = () => {
     Cookies.remove('token');
     document.location = "/login";
@@ -283,7 +270,7 @@ useEffect(() => {
         <h1 className="text-2xl text-white text-center font-bold bg-zinc-600 w-full h-[6%] shadow-lg rounded-md">{currChannelName}</h1>
         <div className="h-[87%] mr-4 ml-4 overflow-scroll mb-4 items-center" id="messages">
           {messages && messages.length > 0 && !isMsgsLoading ? (
-            <button className="text-zinc-200 bg-zinc-700/30 my-4 p-2 rounded-md font-semibold text-center text-xl" onClick={() => handleLoadMoreMsgs()}>
+            <button className="text-zinc-200 bg-zinc-700/30 my-4 p-2 rounded-md font-semibold text-center text-xl" onClick={() => fetchMsgs(messages.length)}>
             Load more messages (UNSTABLE)
             </button>
           ) : null}
