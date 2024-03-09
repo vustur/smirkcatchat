@@ -26,7 +26,6 @@ export default async function handler(req: Request, res: Response) {
                         console.log('Broadcast new Message');
                         const author = (await axios.post("http://localhost:3000/api/fetchNickById", { id: getid.data['id'] }));
                         io.emit('receiveMsg', { channelid: channelid, content: content, authorid: getid.data['id'], date: 1, author: author.data[0]['name'], id: dbmsg.data['msg']['id'] });
-                        // its slow probably because of so many db reqs so ill optimize it later
                     }
                 }
                 catch (error) {

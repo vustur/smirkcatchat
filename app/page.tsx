@@ -9,7 +9,7 @@ import Image from "next/image";
 import axios from "axios";
 import Cookies from 'js-cookie'
 import io from "socket.io-client";
-let chatsocket: any = null
+let socket: any = null;
 
 export default function Home() {
   const [showProfile, setShowProfile] = useState(false)
@@ -106,30 +106,39 @@ export default function Home() {
   }, [currChannelId]);
 
   useEffect(() => {
-    const connSocket = async () => {
-      await axios.get("./api/websocket")
-      chatsocket = io();
-  
-      chatsocket.on("connect", () => {
+    const connectSocket = async () => {
+      const response = await axios.get("./api/websocket");
+      socket = io(response.data.url);
+    };
+
+    const handleNewMessage = (msg: any) => {
+      if (parseInt(msg.channelid) === currChannelId) {
+        setMessages((prevMessages) => [...prevMessages, msg]);
+        const msgElement = document.getElementById('messages');
+        if (msgElement) {
+          setTimeout(() => { msgElement.scrollTo({ top: msgElement.scrollHeight, behavior: 'smooth' }); }, 100);
+        }
+      }
+    };
+
+    const setupSocket = () => {
+      socket.on("connect", () => {
         console.log("[socket] connected to socket");
       });
 
-      chatsocket.on("receiveMsg", (msg: any) => {
-        console.log("[socket] newMessage:");
-        console.log(msg);
-        if (parseInt(msg['channelid']) === currChannelId) {
-          setMessages((prevMessages) => {
-            return [...prevMessages, msg] as SetStateAction<any>;
-          });
-          const msgElement = document.getElementById('messages');
-          if (msgElement) {
-            setTimeout(() => { msgElement.scrollTo({ top: msgElement.scrollHeight, behavior: 'smooth' }); }, 100);
-          }
-        }
-      })
-    }
-    connSocket();
-  }, [])
+      socket.on("receiveMsg", handleNewMessage);
+    };
+
+    connectSocket().then(() => {
+      setupSocket();
+    });
+
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
+  }, [currChannelId]);
 
 useEffect(() => {
   const fetchChannels = async () => {
@@ -209,8 +218,8 @@ useEffect(() => {
     if (e.key === "Enter" && msgInput.length > 0) {
       e.preventDefault();
       try {
-        chatsocket.emit("sendMsg", { channelid: currChannelId, content: msgInput, token: token });
-        console.log('succ sendMsg:');
+        socket.emit("sendMsg", { channelid: currChannelId, content: msgInput, token: token });
+        console.log('succ sendMsg in channel ' + currChannelId + ":");
       } catch (error) {
         console.error('Send msg error - ', error);
       }
