@@ -13,7 +13,7 @@ export default async function handler(req: Request, res: Response) {
         } else if (username.length < 3) {
             throw new Error("Username too short");
         } else if (!username.match(tagAllowedChars)) {
-            throw new Error("Please, use only letters, numbers and underscores");
+            throw new Error("use only letters, numbers and underscores in username");
         } else if (password === "") {
             throw new Error("Password cannot be empty");
         } else if (password.length < 8) {
@@ -23,7 +23,7 @@ export default async function handler(req: Request, res: Response) {
         }
         const uniqueTagResult = await dbPost("SELECT * FROM users WHERE mail = ?", [mail]);
         if(uniqueTagResult.length > 0) {
-            return res.status(500).json({ "result": "Mail not unique" });
+            return res.status(200).json({ "result": "Mail not unique" });
         }
 
         const randtag = (username + Math.floor(Math.random() * 100000000).toString()).toLowerCase();
@@ -33,6 +33,6 @@ export default async function handler(req: Request, res: Response) {
         res.status(200).json({ "result": "success", "token": token });
     } catch (error) {
         console.error(error as any);
-        res.status(500).json({ "result": error.message });
+        res.status(200).json({ "result": error.message });
     }
 }

@@ -102,7 +102,7 @@ export default function Home() {
   useEffect(() => {
     setMessages([])
     console.log("load msgs from channel " + currChannelId);
-    setTimeout(() => { fetchMsgs(0); }, 1000);
+    fetchMsgs(0);
   }, [currChannelId]);
 
   useEffect(() => {
