@@ -17,7 +17,7 @@ export default function Home() {
   const [profileId, setProfileId] = useState(0)
   const [isAdvButttonsEnabled, setIsAdvButttonsEnabled] = useState(false)
   const [messages, setMessages] = useState([])
-  const [profileData, setProfileData] = useState({ name: "", tag: "", bio: "" })
+  const [profileData, setProfileData] = useState({ name: "Loading...", tag: "", bio: "" })
   const [currChannelId, setCurrChannelId] = useState(1)
   const [currChannelName, setCurrChannelName] = useState("chat")
   const [channels, setChannels] = useState([])
@@ -27,6 +27,7 @@ export default function Home() {
   const [isChannelsLoading, setIsChannelsLoading] = useState(false)
   const [selfName, setSelfName] = useState("")
   const [selfTag, setSelfTag] = useState("")
+  const [selfBio, setSelfBio] = useState("")
   const [msgInput, setMsgInput] = useState("")
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [msgsOffset, setMsgsOffset] = useState(0)
@@ -54,6 +55,7 @@ export default function Home() {
           console.log(response.data);
           setSelfName(response.data['profile']['name']);
           setSelfTag (response.data['profile']['tag']);
+          setSelfBio (response.data['profile']['bio']);
         }
         else {
           throw new Error(response.data['result']);
@@ -71,8 +73,9 @@ export default function Home() {
   useEffect(() => {
   const fetchMsgs = async () => {
     try {
+      setMsgsOffset(0);
       setIsMsgsLoading(true)
-      const response = await axios.post("./api/fetchMessages", { id: currChannelId });
+      const response = await axios.post("./api/fetchMessages", { id: currChannelId, offset: msgsOffset });
       setMessages(response.data);
       const msgElement = document.getElementById('messages');
       if (msgElement) {
@@ -160,11 +163,19 @@ useEffect(() => {
       const response = await axios.post("./api/fetchProfileById", { id: userid });
       console.log('succ fetchProfileById:');
       console.log(response.data);
-      setProfileData(response.data['profile'] as {
-        name: string;
-        tag: string;
-        bio: string;
-      });
+      if (response.data['result'] == "Profile not found" || response.data['profile'] == null) {
+        setProfileData({
+          name: "Unkown user",
+          tag: "-",
+          bio: "This user is deleted or does not exist"
+        });
+      } else if (response.data['result'] == "success") {
+        setProfileData(response.data['profile'] as {
+          name: string;
+          tag: string;
+          bio: string;
+        }); 
+      }
     }
     catch (error) {
       console.error('Profile fetch error - ', error);
@@ -193,6 +204,31 @@ useEffect(() => {
       }
       setMsgInput("");
     }
+  }
+
+  const handleLoadMoreMsgs = async () => {
+    setMsgsOffset(msgsOffset + 10) // TODO: fix strange start from 0 offset
+    console.log("load more messages with offset " + msgsOffset + " ! ");
+    try {
+      setIsMsgsLoading(true)
+      const response = await axios.post("./api/fetchMessages", { id: currChannelId, offset: msgsOffset });
+      let newMessages = response.data.map((msg: { date: string, author: string, content: string }) => ({
+        date: new Date(msg.date),
+        author: msg.author,
+        content: msg.content,
+        authorid: msg.authorid,
+        id: msg.id,
+        channelid: msg.channelid
+      }));
+      setMessages((prevMessages) => [...newMessages, ...prevMessages]);
+      console.log('succ fetchMsgs (loadmore func):');
+      console.log(response.data);
+      console.log(messages)
+    } catch (error) {
+      setMessages([]);
+      console.error('Msg fetch error - ', error);
+    }
+    setIsMsgsLoading(false)
   }
 
   const handleLogout = () => {
@@ -245,7 +281,12 @@ useEffect(() => {
       </div>
       <div className="w-8/12 lg:w-10/12 bg-zinc-600 shadow-2xl flex flex-col rounded-t-lg">
         <h1 className="text-2xl text-white text-center font-bold bg-zinc-600 w-full h-[6%] shadow-lg rounded-md">{currChannelName}</h1>
-        <div className="h-[87%] mr-4 ml-4 overflow-scroll mb-4" id="messages">
+        <div className="h-[87%] mr-4 ml-4 overflow-scroll mb-4 items-center" id="messages">
+          {messages && messages.length > 0 && !isMsgsLoading ? (
+            <button className="text-zinc-200 bg-zinc-700/30 my-4 p-2 rounded-md font-semibold text-center text-xl" onClick={() => handleLoadMoreMsgs()}>
+            Load more messages (UNSTABLE)
+            </button>
+          ) : null}
           {messages && messages.length > 0 && !isMsgsLoading ? (
             messages.map((message) => (
             <Message
@@ -294,14 +335,14 @@ useEffect(() => {
         }
           <div className={`w-${isAdvButttonsEnabled ? 'full' : '3/5'} w-full h-full mt-2 flex flex-row-reverse mr-2`}>
             <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1">
-              <Image src="/icons/settings.svg" width={30} height={30} alt="settings" onClick={() => setIsSettingsOpen(true)}></Image>
+              <Image src="/icons/settings.svg" width={30} height={30} alt="settings" onClick={() => setIsSettingsOpen(true)} title="Settings"></Image>
             </button>
             <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
             onClick={() => setIsAdvButttonsEnabled(!isAdvButttonsEnabled)}
             >
               {isAdvButttonsEnabled 
-              ? <Image src="/icons/arrow-right.svg" width={30} height={30} alt="arrowRight"></Image> 
-              : <Image src="/icons/arrow-left.svg"  width={30} height={30} alt="arrowLeft"></Image>
+              ? <Image src="/icons/arrow-right.svg" width={30} height={30} alt="arrowRight" title="Hide fast buttons"></Image> 
+              : <Image src="/icons/arrow-left.svg"  width={30} height={30} alt="arrowLeft"  title="Show fast buttons"></Image>
               }
             </button>
           { isAdvButttonsEnabled 
@@ -311,13 +352,13 @@ useEffect(() => {
                 className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
                 onClick={() => handleLogout()}
                 >
-                <Image src="/icons/door.svg" width={30} height={30} alt="plus" ></Image>
+                <Image src="/icons/door.svg" width={30} height={30} alt="door" title="Logout"></Image>
               </button>
               <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1">
-                <Image src="/icons/hand.svg" width={30} height={30} alt="plus"></Image>
+                <Image src="/icons/hand.svg" width={30} height={30} alt="hand" title="Add friend"></Image>
               </button>
               <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1">
-                <Image src="/icons/plus.svg" width={30} height={30} alt="plus"></Image>
+                <Image src="/icons/plus.svg" width={30} height={30} alt="plus" title="Create server"></Image>
               </button>
               <p className="text-zinc-500 ml-2 mt-1 text-2xl">|</p>
             </div>
@@ -327,7 +368,7 @@ useEffect(() => {
           </div>
         </div>
       </div>
-      <Settings isEnabled={isSettingsOpen} username={selfName} tag={selfTag} handleClose={() => setIsSettingsOpen(false)}></Settings>
+      <Settings isEnabled={isSettingsOpen} username={selfName} tag={selfTag} bio={selfBio} handleClose={() => setIsSettingsOpen(false)}></Settings>
     </div>
   );
 }

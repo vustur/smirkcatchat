@@ -4,7 +4,27 @@ import { NextApiResponse as Response, NextApiRequest as Request } from "next";
 
 export default async function handler(req: Request, res: Response) {
     try {
-        const { mail, username, password } = req.body as unknown as { mail: string, username: string, password: string };
+        const tagAllowedChars = /^[a-z0-9_]*$/;
+        const { mail, username, password } = req.body as { mail: string, username: string, password: string };
+        if (username === "") {
+            throw new Error("Username cannot be empty");
+        } else if (username.length > 15) {
+            throw new Error("Tag too long");
+        } else if (username.length < 3) {
+            throw new Error("Username too short");
+        } else if (!username.match(tagAllowedChars)) {
+            throw new Error("Please, use only letters, numbers and underscores");
+        } else if (password === "") {
+            throw new Error("Password cannot be empty");
+        } else if (password.length < 8) {
+            throw new Error("Password too short (8 chars minimum)");
+        } else if (mail === "") {
+            throw new Error("Mail cannot be empty");
+        }
+        const uniqueTagResult = await dbPost("SELECT * FROM users WHERE mail = ?", [mail]);
+        if(uniqueTagResult.length > 0) {
+            return res.status(500).json({ "result": "Mail not unique" });
+        }
 
         const randtag = (username + Math.floor(Math.random() * 100000000).toString()).toLowerCase();
         const tokenchars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

@@ -2,19 +2,23 @@ import Image from "next/image";
 import PlaceholderImage from "./imgs/placeholder.png"
 import { useState } from "react";
 import axios from "axios";
+import Cookies from 'js-cookie'
+import clsx from "clsx";
 
 type Props = {
     isEnabled: boolean
     username: string
     tag: string
+    bio: string
     handleClose: () => void
 }
 
-export default ({ isEnabled, username, tag, handleClose }: Props) => {
+export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
     const [settingId, setSettingId] = useState(1);
     const [isEditing, setIsEditing] = useState(false);
     const [editedUsername, setEditedUsername] = useState(username);
     const [editedTag, setEditedTag] = useState(tag);
+    const [editedBio, setEditedBio] = useState(bio);
     const [savingError, setSavingError] = useState("");
     const tagAllowedChars = /^[a-z0-9_]*$/;
 
@@ -23,35 +27,37 @@ export default ({ isEnabled, username, tag, handleClose }: Props) => {
         setIsEditing(false);
     }
 
-    const handleSave = () => {
+    const handleSave = async () => {
         try {
             if (editedUsername === "" || editedTag === "") {
-                setSavingError("Invalid username or tag");
-                return;
+                throw new Error("Username or Tag cannot be empty");
             } else if (editedUsername.length > 20) {
-                setSavingError("Username too long");
-                return;
+                throw new Error("Username too long");
             } else if (editedTag.length > 15) {
-                setSavingError("Tag too long");
-                return;
+                throw new Error("Tag too long");
             } else if (editedUsername.length < 3) {
-                setSavingError("Username too short");
-                return;
+                throw new Error("Username too short");
             } else if (editedTag.length < 4) {
-                setSavingError("Tag too short");
-                return;
+                throw new Error("Tag too short");
             } else if (!editedTag.match(tagAllowedChars)) {
-                setSavingError("Tag contains invalid characters");
-                return;
+                throw new Error("Tag can only contain letters, numbers and underscores");
+            } else if (editedBio.length > 150) {
+                throw new Error("Bio too long");
             }
-            if (editedUsername !== username)
-                console.log("succ username")
-            if (editedTag !== tag)
-                console.log("succ tag")
+            if (editedUsername !== username || editedTag !== tag) {
+                const response = await axios.post("./api/updateProfile", { username: editedUsername, tag: editedTag, bio: editedBio, token: Cookies.get('token') })
+                .catch((error) => {
+                    throw new Error(error.response.data['result']);
+                });
+                if (response.data['result'] === "success") {
+                    console.log("updated");
+                }
+            }
             console.log("saving");
             setIsEditing(false);
             setSavingError("");
         } catch (error) {
+            setSavingError("Could not save - " + error.message);
             console.error('Could not save - ', error);
         }
     }
@@ -66,7 +72,7 @@ export default ({ isEnabled, username, tag, handleClose }: Props) => {
     }
 
     return (
-        <div className="absolute w-full h-full backdrop-blur-sm flex flex-row items-center">
+        <div className="absolute w-full h-full backdrop-blur-sm bg-t flex flex-row items-center bg-black/40">
             <div className="z-10 w-3/4 h-[90%] left-[13%] absolute flex flex-col bg-zinc-600 rounded-lg shadow-xl text-white">
             <button className="text-zinc-500 font-semibold text-2xl text-right mr-2 mt-3" onClick={() => handleClose()}>❌</button>
             <div className="flex flex-row-reverse h-full">
@@ -76,6 +82,7 @@ export default ({ isEnabled, username, tag, handleClose }: Props) => {
                         <Image src="/imgs/placeholder.png" width={400} height={400} alt={"Your avatar"} className="transition ease-in-out duration-300 rounded-full shadow-md hover:shadow-xl size-32 mt-4"></Image>
                         <h1 className="font-bold mt-2 text-center text-5xl w-fit">{username}</h1>
                         <h1 className="font-medium text-center text-sm text-zinc-400 w-fit">@{tag}</h1>
+                        <h1 className="font-medium mt-2 text-center text-xl w-fit">{bio}</h1>
                         <button 
                             className="text-zinc-100 font-semibold text-2xl text-center mt-3 bg-zinc-600 bg-opacity-40 p-2 rounded-md mb-1"
                             onClick={() => setIsEditing(true)}
@@ -91,6 +98,7 @@ export default ({ isEnabled, username, tag, handleClose }: Props) => {
                             className="font-medium mt-2 text-center text-xl w-fit bg-opacity-40 bg-zinc-600 py-1 rounded-md mb-1"
                             placeholder="Your username"
                             value={editedUsername}
+                            
                             onChange={(e) => setEditedUsername(e.target.value)}
                         ></input>
                         <input 
@@ -99,6 +107,13 @@ export default ({ isEnabled, username, tag, handleClose }: Props) => {
                             value={editedTag}
                             onChange={(e) => setEditedTag(e.target.value)}
                         ></input>
+                        <textarea 
+                            className="font-medium text-center text-xl text-zinc-100 w-fit bg-opacity-40 bg-zinc-600 py-1 rounded-md mb-1"
+                            placeholder="Your bio"
+                            value={editedBio}
+                            onChange={(e) => setEditedBio(e.target.value)}
+                            rows={5}
+                        ></textarea>
                         <div className="flex flex-row gap-4">
                             <button 
                                 className="text-zinc-100 font-semibold text-2xl text-center mt-3 bg-green-400 bg-opacity-40 p-2 rounded-md mb-1"
