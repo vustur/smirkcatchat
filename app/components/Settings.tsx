@@ -73,13 +73,13 @@ export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
 
     return (
         <div className="absolute w-full h-full backdrop-blur-sm bg-t flex flex-row items-center bg-black/40">
-            <div className="z-10 w-3/4 h-[90%] left-[13%] absolute flex flex-col bg-zinc-600 rounded-lg shadow-xl text-white">
+            <div className="z-10 w-3/4 h-[90%] left-[13%] absolute flex flex-col bg-zinc-600 rounded-lg shadow-xl text-white overflow-scroll">
             <button className="text-zinc-500 font-semibold text-2xl text-right mr-2 mt-3" onClick={() => handleClose()}>❌</button>
             <div className="flex flex-row-reverse h-full">
                 { settingId === 1 && !isEditing ? (
                     // Account show
                     <div className="flex flex-col items-center mx-5 mt-2 mb-5 bg-zinc-700 rounded-md shadow-lg w-[75%]">
-                        <Image src="/imgs/placeholder.png" width={400} height={400} alt={"Your avatar"} className="transition ease-in-out duration-300 rounded-full shadow-md hover:shadow-xl size-32 mt-4"></Image>
+                        <Image src="/imgs/placeholder.png" width={400} height={400} alt={"Your avatar"} className="transition ease-in-out duration-300 rounded-full shadow-md hover:shadow-xl w-3/12 mt-4"></Image>
                         <h1 className="font-bold mt-2 text-center text-5xl w-fit">{username}</h1>
                         <h1 className="font-medium text-center text-sm text-zinc-400 w-fit">@{tag}</h1>
                         <h1 className="font-medium mt-2 text-center text-xl w-fit">{bio}</h1>
@@ -93,7 +93,7 @@ export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
                     // Account edit
                     <div className="flex flex-col items-center mx-5 mt-2 mb-5 bg-zinc-700 rounded-md shadow-lg w-[75%]">
                         <h1 className="font-bold mt-2 text-center text-2xl w-fit text-red-300">{savingError}</h1>
-                        <Image src="/imgs/placeholder.png" width={400} height={400} alt={"Your avatar"} className="transition ease-in-out duration-300 rounded-full shadow-md hover:shadow-xl size-32 mt-4"></Image>
+                        <Image src="/imgs/placeholder.png" width={400} height={400} alt={"Your avatar"} className="transition ease-in-out duration-300 rounded-full shadow-md hover:shadow-xl w-3/12 mt-4"></Image>
                         <input 
                             className="font-medium mt-2 text-center text-xl w-fit bg-opacity-40 bg-zinc-600 py-1 rounded-md mb-1"
                             placeholder="Your username"

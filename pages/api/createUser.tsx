@@ -13,7 +13,7 @@ export default async function handler(req: Request, res: Response) {
         } else if (username.length < 3) {
             throw new Error("Username too short");
         } else if (!username.match(tagAllowedChars)) {
-            throw new Error("use only letters, numbers and underscores in username");
+            throw new Error("only a-z, 0-9 and _");
         } else if (password === "") {
             throw new Error("Password cannot be empty");
         } else if (password.length < 8) {

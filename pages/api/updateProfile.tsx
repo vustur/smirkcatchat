@@ -23,7 +23,7 @@ export default async function handler(req: Request, res: Response) {
         } else if (tag.length < 4) {
             throw new Error("Tag too short");
         } else if (!tag.match(tagAllowedChars)) {
-            throw new Error("Tag can only contain letters, numbers and underscores");
+            throw new Error("only a-z, 0-9 and _");
         } else if (bio.length > 150) {
             throw new Error("Bio too long");
         }

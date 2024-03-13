@@ -1,3 +1,5 @@
+import { title } from "process"
+
 type Props = {
     name: string
     onSwitch: () => void
@@ -5,9 +7,10 @@ type Props = {
 
 export default ({ name, onSwitch }: Props) => {
     return ( /* транзишион шоб было вау круто */
-        <button className="text-gray-200 hover:text-indigo-200 hover:bg-zinc-600/40 mr-4 ml-4 rounded-lg p-2 font-semibold hover:shadow-lg transition ease-in-out duration-300 text-nowrap overflow-hidden text-ellipsis"
+        <button className="text-gray-200 hover:text-indigo-200 hover:bg-zinc-600/40 mr-4 ml-4 rounded-lg p-2 font-semibold hover:shadow-lg transition ease-in-out duration-300 text-nowrap overflow-hidden text-ellipsis whitespace-nowrap"
         onClick={() => onSwitch()}
-        ># {name}
+        title={name}
+        ># {name.length > 17 ? name.substring(0, 16) + "..." : name}
         </button>
     )
 }
