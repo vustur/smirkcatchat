@@ -1,9 +1,8 @@
 import Image from "next/image";
 import PlaceholderImage from "./imgs/placeholder.png"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from 'js-cookie'
-import clsx from "clsx";
 
 type Props = {
     isEnabled: boolean
@@ -15,7 +14,6 @@ type Props = {
 
 export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
     const [settingId, setSettingId] = useState(1);
-    const [isEditing, setIsEditing] = useState(false);
     const [editedUsername, setEditedUsername] = useState(username);
     const [editedTag, setEditedTag] = useState(tag);
     const [editedBio, setEditedBio] = useState(bio);
@@ -24,12 +22,11 @@ export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
 
     const switchTab = (id: number) => {
         setSettingId(id);
-        setIsEditing(false);
     }
 
     const handleSave = async () => {
         try {
-            if (editedUsername === "" || editedTag === "") {
+            if (editedUsername === "" || editedTag === "" || editedBio === "") {
                 throw new Error("Username or Tag cannot be empty");
             } else if (editedUsername.length > 20) {
                 throw new Error("Username too long");
@@ -44,17 +41,19 @@ export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
             } else if (editedBio.length > 150) {
                 throw new Error("Bio too long");
             }
-            if (editedUsername !== username || editedTag !== tag) {
+            if (editedUsername !== username || editedTag !== tag || editedBio !== bio) {
                 const response = await axios.post("./api/updateProfile", { username: editedUsername, tag: editedTag, bio: editedBio, token: Cookies.get('token') })
                 .catch((error) => {
                     throw new Error(error.response.data['result']);
                 });
                 if (response.data['result'] === "success") {
-                    console.log("updated");
+                    console.log("updated user profile");
+                    tag = editedTag;
+                    username = editedUsername;
+                    bio = editedBio;
                 }
             }
             console.log("saving");
-            setIsEditing(false);
             setSavingError("");
         } catch (error) {
             setSavingError("Could not save - " + error.message);
@@ -64,8 +63,16 @@ export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
 
     const handleEditExit = () => {
         console.log("exiting edit");
-        setIsEditing(false);
+        setEditedBio(bio);
+        setEditedTag(tag);
+        setEditedUsername(username);
     }
+
+    useEffect(() => {
+        setEditedBio(bio);
+        setEditedTag(tag);
+        setEditedUsername(username);
+    })
 
     if (!isEnabled) {
         return null;
@@ -76,20 +83,7 @@ export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
             <div className="z-10 w-3/4 h-[90%] left-[13%] absolute flex flex-col bg-zinc-600 rounded-lg shadow-xl text-white overflow-scroll">
             <button className="text-zinc-500 font-semibold text-2xl text-right mr-2 mt-3" onClick={() => handleClose()}>❌</button>
             <div className="flex flex-row-reverse h-full">
-                { settingId === 1 && !isEditing ? (
-                    // Account show
-                    <div className="flex flex-col items-center mx-5 mt-2 mb-5 bg-zinc-700 rounded-md shadow-lg w-[75%]">
-                        <Image src="/imgs/placeholder.png" width={400} height={400} alt={"Your avatar"} className="transition ease-in-out duration-300 rounded-full shadow-md hover:shadow-xl w-3/12 mt-4"></Image>
-                        <h1 className="font-bold mt-2 text-center text-5xl w-fit">{username}</h1>
-                        <h1 className="font-medium text-center text-sm text-zinc-400 w-fit">@{tag}</h1>
-                        <h1 className="font-medium mt-2 text-center text-xl w-fit">{bio}</h1>
-                        <button 
-                            className="text-zinc-100 font-semibold text-2xl text-center mt-3 bg-zinc-600 bg-opacity-40 p-2 rounded-md mb-1"
-                            onClick={() => setIsEditing(true)}
-                            >Edit
-                        </button>
-                    </div>
-                ) : settingId === 1 && isEditing ? (
+                { settingId === 1 ? (
                     // Account edit
                     <div className="flex flex-col items-center mx-5 mt-2 mb-5 bg-zinc-700 rounded-md shadow-lg w-[75%]">
                         <h1 className="font-bold mt-2 text-center text-2xl w-fit text-red-300">{savingError}</h1>

@@ -8,7 +8,7 @@ export default async function handler(req: Request, res: Response) {
         if (result.length > 0) {
             res.status(200).json({ "result": "success", "token": result[0]["token"] });
         } else {
-            throw new Error("Invalid credentials");
+            throw new Error("Invalid credentials (or db error?)");
         }
     } catch (error) {
         console.error(error);

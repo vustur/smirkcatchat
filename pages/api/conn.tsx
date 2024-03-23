@@ -14,6 +14,7 @@ export default async function dbPost(query: string, values: any) {
     await db.end();
     return req;
   } catch (error) {
+    await db.end();
     return { error };
   }
 }

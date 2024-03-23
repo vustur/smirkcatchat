@@ -4,6 +4,7 @@ import Channel from "./components/Channel";
 import Server from "./components/Server";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
+import ServerSettings from "./components/SettingsServer";
 import React, { useState, useEffect, SetStateAction } from "react";
 import Image from "next/image";
 import axios from "axios";
@@ -32,10 +33,12 @@ export default function Home() {
   const [selfBio, setSelfBio] = useState("")
   const [msgInput, setMsgInput] = useState("")
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isServerSettingsOpen, setIsServerSettingsOpen] = useState(false)
 
   const token = Cookies.get('token')
 
   useEffect(() => {
+    console.log(new Date().getMonth() === 2 && new Date().getDate() === 17)
     if (token) {
       console.log("token exists! Its " + token)
     }
@@ -178,7 +181,6 @@ export default function Home() {
     if (showProfile) {
       return
     }
-    console.log(event.clientY + " " + window.innerHeight / 4);
     if (event.clientY > window.innerHeight / 8 && event.clientY < (window.innerHeight / 4) * 3) {
       setMouseY(event.clientY); 
     }
@@ -245,16 +247,24 @@ export default function Home() {
       const response = await axios.post("./api/checkPermissions", { token, serverid })
       console.log('succ checkPermissions:');
       if (response.data['result'] != "success"){
+        setCurrPerms({"mng_serv": 0, "owner_perm": 0, "mng_chnls": 0, "mng_mems": 0, "dlt_msgs": 0})
         console.log("No perms in this server")
         return
       }
-      console.log(response.data['perms']);
-      setCurrPerms(response.data['perms'])
-      console.log(response.data);
+      const permsArray = JSON.parse(response.data['perms']['perms'])
+      setCurrPerms(permsArray);
+      console.log(permsArray);
     }
     catch (error) {
       console.error("Perms check error - ", error);
     }
+  }
+
+  const handleOpenServerSettings = () => {
+    if (currServerId == null || currServerId == 0 || currPerms == null) {
+      return
+    }
+    setIsServerSettingsOpen(true)
   }
 
   return (
@@ -269,7 +279,7 @@ export default function Home() {
         closeProfile={handleProfileClose}/>
       <div className="flex flex-row h-full w-fit relative">
         <div className="w-20 min-w-20 bg-zinc-600">
-          {servers ? (
+          {servers.length > 0 ? (
             servers.map((server) => (
             <Server
               name={server['name']}
@@ -284,7 +294,12 @@ export default function Home() {
           }
         </div>
         <div className="w-3/12 lg:w-2/12 min-w-52 bg-zinc-700 shadow-2xl flex flex-col">
-          <div className="text-white text-center font-bold bg-zinc-600/40 w-full h-12 shadow-lg mb-3 pt-2">{currServerName}</div>
+          <div className="text-white text-center font-bold bg-zinc-600/40 w-full h-12 shadow-lg mb-3 pt-2 hover:cursor-pointer"
+            title={currServerName
+            + "\nClick to open settings"}
+            onClick={() => handleOpenServerSettings()}>
+            {currServerName.length > 20 ? currServerName.slice(0, 20) + '...' : currServerName}
+          </div>
           {channels && channels.length > 0 && !isChannelsLoading ? (
             channels.map((channel) => {
               return (
@@ -352,7 +367,7 @@ export default function Home() {
       </div>
       <div className="w-8/12 lg:w-10/12 bg-zinc-600 shadow-2xl flex flex-col rounded-t-lg">
         <h1 className="text-2xl text-white text-center font-bold bg-zinc-600 w-full h-14 shadow-lg rounded-md">{currChannelName}</h1>
-        <div className="h-full mr-4 ml-4 overflow-scroll mb-4 items-center" id="messages">
+        <div className="h-full mr-4 ml-4 overflow-scroll overflow-x-hidden mb-4 items-center" id="messages">
           {messages && messages.length > 0 && !isMsgsLoading ? (
             <button className="text-zinc-200 bg-zinc-700/30 my-4 p-2 rounded-md font-semibold text-center text-xl" onClick={() => fetchMsgs(messages.length)}>
             Load more messages
@@ -394,6 +409,7 @@ export default function Home() {
         </div>
       </div>
       <Settings isEnabled={isSettingsOpen} username={selfName} tag={selfTag} bio={selfBio} handleClose={() => setIsSettingsOpen(false)}></Settings>
+      <ServerSettings isEnabled={isServerSettingsOpen} serverid={currServerId} perms={currPerms} handleClose={() => setIsServerSettingsOpen(false)}></ServerSettings>
     </div>
   );
 }
