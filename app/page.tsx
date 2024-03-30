@@ -5,6 +5,7 @@ import Server from "./components/Server";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
 import ServerSettings from "./components/SettingsServer";
+import NewChannelPopup from "./components/newChannelPopup";
 import React, { useState, useEffect, SetStateAction } from "react";
 import Image from "next/image";
 import axios from "axios";
@@ -35,6 +36,7 @@ export default function Home() {
   const [msgInput, setMsgInput] = useState("")
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isServerSettingsOpen, setIsServerSettingsOpen] = useState(false)
+  const [isCreateChannelPopupOpen, setIsCreateChannelPopupOpen] = useState(false)
 
   const token = Cookies.get('token')
 
@@ -167,7 +169,7 @@ export default function Home() {
   useEffect(() => {
     const fetchServers = async () => {
       try {
-        const response = await axios.get("./api/fetchServers");
+        const response = await axios.post("./api/fetchServers", {token: token});
         setServers(response.data);
         console.log('succ fetchServers:');
         console.log(response.data);
@@ -269,6 +271,19 @@ export default function Home() {
     setIsServerSettingsOpen(true)
   }
 
+  const handleCreateChannel = async (name) => {
+    try {
+      if (currServerId == null || currServerId == 0 || currPerms == null) {
+        return
+      }
+      setIsCreateChannelPopupOpen(false)
+      await axios.post("./api/createChannel", { token, serverid: currServerId, name })
+    }
+    catch (error) {
+      console.error("Create channel error - ", error.message);
+    }
+  }
+
   return (
     <div className="h-screen flex" onMouseMove={handleMouseMove}>
       <Profile
@@ -320,6 +335,11 @@ export default function Home() {
             <p className="text-zinc-500 pt-8 font-semibold bottom-1/4 text-xl text-center select-none">No channels to display? <br></br>Weird...</p>
           )
           }
+          { currServerId != 0 && !isChannelsLoading && currPerms != null && (currPerms['mng_chnls'] == 1 || currPerms['owner_perm'] == 1) ? (
+            <button className="w-full h-12 text-zinc-500 text-xl font-semibold hover:cursor-pointer"
+            onClick={() => setIsCreateChannelPopupOpen(true)}
+            >+ Create channel</button>
+          ): null}
         </div>
         <div className="absolute w-full bottom-0 left-0 h-14">
         <div className="w-full h-full bg-gradient-to-r from-zinc-600 to-zinc-700 shadow-lg flex flex-row">
@@ -412,6 +432,7 @@ export default function Home() {
       </div>
       <Settings isEnabled={isSettingsOpen} username={selfName} tag={selfTag} bio={selfBio} handleClose={() => setIsSettingsOpen(false)}></Settings>
       <ServerSettings isEnabled={isServerSettingsOpen} serverid={currServerId} perms={currPerms} handleClose={() => setIsServerSettingsOpen(false)} openProfile={(userid) => handleProfileOpen(userid)} userid={selfId}></ServerSettings>
+      <NewChannelPopup isEnabled={isCreateChannelPopupOpen} handleClose={() => setIsCreateChannelPopupOpen(false)} handleConfirm={(name) => handleCreateChannel(name)}></NewChannelPopup>
     </div>
   );
 }

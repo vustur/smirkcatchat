@@ -5,12 +5,12 @@
 * [X] Login and signup pages
 * [X] Servers and channels
 * [X] Realtime chat
-* [ ] Account settings (done without profile avatar change)
-* [ ] Server settings
-* [ ] Channel settings
+* [X] Account settings (no profile avatar change)
+* [X] Server settings
+* [ ] Channel management (no name change, no desc change, etc)
 * [X] Permissions
 * [ ] Security
-* [ ] Profile view (done without permissions buttons like ban, kick, etc)
+* [X] Profile view (no permissions buttons like ban, kick, etc)
 
 ### Why you should use smirkcatchat instead of discord/slack/revolt??
 

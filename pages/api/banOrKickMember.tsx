@@ -16,7 +16,7 @@ export default async function handler(req: Request, res: Response) {
     }
     const perms = JSON.parse(permsReq[0]['perms']);
     if (perms['mng_mems'] == 0 && perms['owner_perm'] == 0) {
-        throw new Error("Error with permissions (no access)");
+        throw new Error("Permissions found, but no access to ban or kick members");
     }
     if (targetid == getid.data['id']) {
         throw new Error("Having fun with api, huh?");
@@ -28,9 +28,10 @@ export default async function handler(req: Request, res: Response) {
         if (banlistArr.includes(targetid)) {
             throw new Error("User is already banned");
         }
-        banlistArr.push(targetid);
-        await dbPost("UPDATE servers SET bans = ? WHERE serverid = ?", [banlistArr, serverid]);
-    } else if (action == "kick") {
+        const newBans = '[' + banlistArr.join(',') + ',' + targetid + ']';
+        await dbPost("UPDATE servers SET bans = ? WHERE serverid = ?", [newBans, serverid]);
+    }
+    if (action == "kick" || action == "ban") {
         const serverdata = await dbPost("SELECT * FROM servers WHERE serverid = ?", [serverid]);
         const memlistArr = serverdata[0]['members'].replace(/^\[/, '').replace(/]$/, '').split(',').map(Number);
         if (!memlistArr.includes(targetid)) {

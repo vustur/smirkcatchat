@@ -23,7 +23,7 @@ export default async function handler(req: Request, res: Response) {
         }
         // fetching bans
         const bannedUsers = await dbPost("SELECT bans FROM servers WHERE serverid = ?", [serverid])
-        if (bannedUsers[0]['bans'] == null) {
+        if (bannedUsers[0]['bans'] == null || bannedUsers[0]['bans'] == "[]") {
             res.status(200).json({'members': membersData, 'bans': []});
             return
         }
