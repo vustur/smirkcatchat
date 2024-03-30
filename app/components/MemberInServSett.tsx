@@ -4,29 +4,38 @@ type Props = {
     username: string
     tag: number
     id: string
-    openSettings: () => void
+    openPermsSettings: () => void
+    openProfile: (userid: number) => void
+    onBanClick: () => void
+    onKickClick: () => void
+    onUnbanClick: () => void
     isBanTab: boolean
+    showActionButtons: boolean
 }
 
-export default ({ username, tag, id, openSettings, isBanTab }: Props) => {
+export default ({ username, tag, id, openProfile, openPermsSettings, isBanTab, showActionButtons, onBanClick, onKickClick, onUnbanClick }: Props) => {
     return (
         <div className="flex flex-row w-[90%] p-2 px-2 m-3 rounded-xl bg-zinc-600">
             <Image src={"/imgs/placeholder.png"} 
                 width={60} height={60} alt={username} 
                 className="rounded-full shadow-md mr-2 mt-auto mb-auto hover:cursor-pointer" 
-                //onClick={open profile}
+                onClick={() => openProfile(id)}
             >
             </Image>
             <div className="flex flex-col w-full h-full">
-                <p className="text-white font-bold transition ease-in-out duration-300">
+                <p className="text-white font-bold transition ease-in-out duration-300"
+                onClick={() => openProfile(id)}
+                >
                     {username}
                 </p>
-                <p className="text-zinc-500 font-normal text-sm">
+                <p className="text-zinc-500 font-normal text-sm"
+                onClick={() => openProfile(id)}
+                >
                     @{tag}
                 </p>
             </div>
             { /* TODO: replace emojis with icons bruh */ }
-            {!isBanTab ? (
+            {!isBanTab && showActionButtons && (
             <div className="flex flex-row-reverse w-full h-full">
                 <button
                     className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-opacity-40 duration-200"
@@ -36,27 +45,27 @@ export default ({ username, tag, id, openSettings, isBanTab }: Props) => {
                 </button>
                 <button
                     className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-red-600 duration-200"
-                    // onClick={ban}
+                    onClick={() => onBanClick()}
                 >
                     🔨
                 </button>
                 <button
                     className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-red-600 duration-200"
-                    // onClick={kick}
+                    onClick={() => onKickClick()}
                 >
                     🥾
                 </button>
             </div>
-            ) : (
+            ) || (isBanTab && showActionButtons && (
             <div className="flex flex-row-reverse w-full h-full">
                 <button
                     className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-opacity-40 duration-200"
-                    // onClick={unban}
+                    onClick={() => onUnbanClick()}
                 >
                     🤝
                 </button>
             </div>
-            )}
+            ))}
         </div>
     )
 }

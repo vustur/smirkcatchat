@@ -31,6 +31,7 @@ export default function Home() {
   const [selfName, setSelfName] = useState("")
   const [selfTag, setSelfTag] = useState("")
   const [selfBio, setSelfBio] = useState("")
+  const [selfId, setSelfId] = useState(0)
   const [msgInput, setMsgInput] = useState("")
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isServerSettingsOpen, setIsServerSettingsOpen] = useState(false)
@@ -60,6 +61,7 @@ export default function Home() {
           setSelfName(response.data['profile']['name']);
           setSelfTag (response.data['profile']['tag']);
           setSelfBio (response.data['profile']['bio']);
+          setSelfId  (response.data['profile']['id']);
         }
         else {
           throw new Error(response.data['result']);
@@ -409,7 +411,7 @@ export default function Home() {
         </div>
       </div>
       <Settings isEnabled={isSettingsOpen} username={selfName} tag={selfTag} bio={selfBio} handleClose={() => setIsSettingsOpen(false)}></Settings>
-      <ServerSettings isEnabled={isServerSettingsOpen} serverid={currServerId} perms={currPerms} handleClose={() => setIsServerSettingsOpen(false)}></ServerSettings>
+      <ServerSettings isEnabled={isServerSettingsOpen} serverid={currServerId} perms={currPerms} handleClose={() => setIsServerSettingsOpen(false)} openProfile={(userid) => handleProfileOpen(userid)} userid={selfId}></ServerSettings>
     </div>
   );
 }

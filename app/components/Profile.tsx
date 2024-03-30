@@ -9,9 +9,12 @@ type Props = {
 }
 
 export default ({ id, show, mouseY, closeProfile, name, tag, bio }: Props) => {
+    if (!show) {
+        return null
+    }
 
     return (
-        <div className="absolute z-10 w-64 bg-zinc-800 rounded-l-lg shadow-xl transition-all duration-300 ease-in-out" style={{ top: `${mouseY}px`, right: `${show ? "0" : "-260px"}` }}>
+        <div className="absolute z-10 w-64 bg-zinc-800 rounded-l-lg shadow-xl transition-all duration-300 ease-in-out right-0яяяяя" style={{ top: `${mouseY}px` }}>
             <div className="flex flex-col ml-5">
                 <div className="flex flex-row justify-between">
                     <h1 className="text-slate-100 text-2xl font-bold mt-5">{name}</h1>

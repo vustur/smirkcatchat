@@ -8,7 +8,7 @@
 * [ ] Account settings (done without profile avatar change)
 * [ ] Server settings
 * [ ] Channel settings
-* [ ] Permissions
+* [X] Permissions
 * [ ] Security
 * [ ] Profile view (done without permissions buttons like ban, kick, etc)
 

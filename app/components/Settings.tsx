@@ -72,7 +72,7 @@ export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
         setEditedBio(bio);
         setEditedTag(tag);
         setEditedUsername(username);
-    })
+    }, [])
 
     if (!isEnabled) {
         return null;
