@@ -11,9 +11,16 @@ export default async function handler(req: Request, res: Response) {
     }
     const server = await dbPost("SELECT * FROM servers WHERE link = ?", [link]);
     if (server.length == 0) {
-        throw new Error("Server doesnt exists. Link: " + link);
+      throw new Error("Server doesnt exists. Link: " + link);
     }
     const serverMems = server[0]['members'].replace(/^\[/, '').replace(/]$/, '').split(',').map(Number);
+    const serverBans = server[0]['bans'].replace(/^\[/, '').replace(/]$/, '').split(',').map(Number);
+    if (serverMems.includes(selfdata.data['id'])) {
+      throw new Error("Already in server");
+    }
+    if (serverBans.includes(selfdata.data['id'])) {
+      throw new Error("You are banned from this server");
+    }
     serverMems.push(selfdata.data['id']);
     await dbPost("UPDATE servers SET members = ? WHERE serverid = ?", ['[' + serverMems.join(',') + ']', server[0]['serverid']]);
     res.status(200).json({ "result": "success" });
