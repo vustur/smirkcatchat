@@ -6,8 +6,8 @@
 * [X] Servers and channels
 * [X] Realtime chat
 * [X] Account settings (no profile avatar change)
-* [X] Server settings
-* [ ] Channel management (no name change, no desc change, etc)
+* [X] Server settings (no leave)
+* [ ] Channel management (only channel creation)
 * [X] Permissions
 * [ ] Security
 * [X] Profile view (no permissions buttons like ban, kick, etc)

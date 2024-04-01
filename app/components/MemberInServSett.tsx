@@ -1,4 +1,5 @@
 import Image from "next/image"
+import IconButton from "./IconButton"
 
 type Props = {
     username: string
@@ -34,42 +35,15 @@ export default ({ username, tag, id, openProfile, openPermsSettings, isBanTab, s
                     @{tag}
                 </p>
             </div>
-            { /* TODO: replace emojis with icons bruh */ }
             {!isBanTab && showActionButtons && (
-            <div className="flex flex-row-reverse w-full h-full">
-                <button
-                    className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-opacity-40 duration-200 items-center"
-                    // onClick={change user perms?}
-                >
-                    <Image src="/icons/settings.svg" width={28} height={28}
-                    className="p-auto m-auto"
-                    alt="Perms" title="Configure permissions"></Image>
-                </button>
-                <button
-                    className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-red-600 duration-200"
-                    onClick={() => onBanClick()}
-                >
-                   <Image src="/icons/hammer.svg" width={28} height={28}
-                    className="p-auto m-auto"
-                    alt="Ban" title="Ban"></Image>
-                </button>
-                <button
-                    className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-red-600 duration-200"
-                    onClick={() => onKickClick()}
-                >
-                   <Image src="/icons/boot.svg" width={28} height={28}
-                    className="p-auto m-auto"
-                    alt="Kick" title="Kick"></Image>
-                </button>
+            <div className="flex flex-row-reverse w-full mb-auto mt-auto">
+                <IconButton scr="/icons/settings.svg" alt="Settings" title="Open permissions settings" hoverClr="gray" onClick={() => openPermsSettings()}/>
+                <IconButton scr="/icons/hammer.svg" alt="Ban" title="Ban" hoverClr="red" onClick={() => onBanClick()}/>
+                <IconButton scr="/icons/boot.svg" alt="Kick" title="Kick" hoverClr="red" onClick={() => onKickClick()}/>
             </div>
             ) || (isBanTab && showActionButtons && (
-            <div className="flex flex-row-reverse w-full h-full">
-                <button
-                    className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-opacity-40 duration-200"
-                    onClick={() => onUnbanClick()}
-                >
-                    🤝
-                </button>
+            <div className="flex flex-row-reverse w-full mb-auto mt-auto">
+                <IconButton scr="/icons/handshake.svg" alt="Unban" title="Unban" hoverClr="gray" onClick={() => onUnbanClick()}/>
             </div>
             ))}
         </div>

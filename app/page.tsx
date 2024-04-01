@@ -8,6 +8,7 @@ import ServerSettings from "./components/SettingsServer";
 import NewChannelPopup from "./components/NewChannelPopup";
 import CreateServerPopup from "./components/CreateServerPopup";
 import JoinServerPopup from "./components/JoinServerPopup";
+import IconButton from "./components/IconButton";
 import React, { useState, useEffect, SetStateAction } from "react";
 import Image from "next/image";
 import axios from "axios";
@@ -46,7 +47,6 @@ export default function Home() {
   const token = Cookies.get('token')
 
   useEffect(() => {
-    console.log(new Date().getMonth() === 2 && new Date().getDate() === 17)
     if (token) {
       console.log("token exists! Its " + token)
     }
@@ -389,7 +389,7 @@ export default function Home() {
           ): null}
         </div>
         <div className="absolute w-full bottom-0 left-0 h-14">
-        <div className="w-full h-full bg-gradient-to-r from-zinc-600 to-zinc-700 shadow-lg flex flex-row">
+        <div className="w-full h-full bg-gradient-to-r from-zinc-500 to-zinc-600 shadow-lg flex flex-row">
         { !isAdvButttonsEnabled 
         ? ( <div className="w-2/5 h-full mt-1">
             <h1 className="text-xl text-white font-semibold ml-2 -mb-1">{ selfName ? selfName : "Loading..." }</h1>
@@ -399,36 +399,18 @@ export default function Home() {
         : null
         }
           <div className={`w-${isAdvButttonsEnabled ? 'full' : '3/5'} w-full h-full mt-2 flex flex-row-reverse mr-2`}>
-            <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1">
-              <Image src="/icons/settings.svg" width={30} height={30} alt="settings" onClick={() => setIsSettingsOpen(true)} title="Settings"></Image>
-            </button>
-            <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
-            onClick={() => setIsAdvButttonsEnabled(!isAdvButttonsEnabled)}
-            >
-              {isAdvButttonsEnabled 
-              ? <Image src="/icons/arrow-right.svg" width={30} height={30} alt="arrowRight" title="Hide fast buttons"></Image> 
-              : <Image src="/icons/arrow-left.svg"  width={30} height={30} alt="arrowLeft"  title="Show fast buttons"></Image>
-              }
-            </button>
+            <IconButton scr="/icons/settings.svg" alt="settings" title="Settings" hoverClr="gray" onClick={() => setIsSettingsOpen(true)} size={40}></IconButton>
+            { isAdvButttonsEnabled ? (
+            <IconButton scr="/icons/arrow-right.svg" alt="arrowRight" title="Show fast buttons" hoverClr="gray" onClick={() => setIsAdvButttonsEnabled(!isAdvButttonsEnabled)}></IconButton>
+            ) : 
+            <IconButton scr="/icons/arrow-left.svg" alt="arrowLeft" title="Hide fast buttons" hoverClr="gray" onClick={() => setIsAdvButttonsEnabled(!isAdvButttonsEnabled)}></IconButton>
+            }
           { isAdvButttonsEnabled 
           ? ( /* эво глупо но JSX expression allows only one element!! */
             <div className="h-full w-max flex flex-row">
-              <button 
-                className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
-                onClick={() => handleLogout()}
-                >
-                <Image src="/icons/door.svg" width={30} height={30} alt="door" title="Logout"></Image>
-              </button>
-              <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
-              onClick={() => setIsJoinServerPopupOpen(true)}
-              >
-                <Image src="/icons/hand.svg" width={30} height={30} alt="hand" title="Join server"></Image>
-              </button>
-              <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
-              onClick={() => setIsCreateServerPopupOpen(true)}
-              >
-                <Image src="/icons/plus.svg" width={30} height={30} alt="plus" title="Create server"></Image>
-              </button>
+              <IconButton scr="/icons/door.svg" alt="logout" title="Logout" hoverClr="red" onClick={() => handleLogout()}></IconButton>
+              <IconButton scr="/icons/hand.svg" alt="hand" title="Join server" hoverClr="gray" onClick={() => setIsJoinServerPopupOpen(true)}></IconButton>
+              <IconButton scr="/icons/plus.svg" alt="plus" title="Create server" hoverClr="gray" onClick={() => setIsCreateServerPopupOpen(true)}></IconButton>
               <p className="text-zinc-500 ml-2 mt-1 text-2xl">|</p>
             </div>
           )
@@ -439,7 +421,9 @@ export default function Home() {
       </div>
       </div>
       <div className="w-8/12 lg:w-10/12 bg-zinc-600 shadow-2xl flex flex-col rounded-t-lg">
-        <h1 className="text-2xl text-white text-center font-bold bg-zinc-600 w-full h-14 shadow-lg rounded-md">{currChannelName}</h1>
+        <div className="w-full h-14 flex flex-row bg-zinc-600 shadow-lg rounded-md">
+          <h1 className="w-full text-2xl text-white text-center font-bold">{currChannelName}</h1>
+        </div>
         <div className="h-full mr-4 ml-4 overflow-scroll overflow-x-hidden mb-4 items-center" id="messages">
           {messages && messages.length > 0 && !isMsgsLoading ? (
             <button className="text-zinc-200 bg-zinc-700/30 my-4 p-2 rounded-md font-semibold text-center text-xl" onClick={() => fetchMsgs(messages.length)}>

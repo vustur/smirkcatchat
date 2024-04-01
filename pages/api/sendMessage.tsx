@@ -11,9 +11,8 @@ export default async function handler(req: Request, res: Response) {
             throw new Error(getid.data['result']);
         }
         const authorid = getid.data['id'];
-        const date = 1; // Fix this later
 
-        var msg = await dbPost("INSERT INTO messages (content, date, authorid, channelid) VALUES (?, ?, ?, ?)", [content, date, authorid, channelid]);
+        var msg = await dbPost("INSERT INTO messages (content, authorid, channelid) VALUES (?, ?, ?)", [content, authorid, channelid]);
         res.status(200).json({ "result": "success", "msg": msg });
     } catch (error) {
         console.error(error);

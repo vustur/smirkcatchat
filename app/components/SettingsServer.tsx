@@ -223,7 +223,7 @@ export default ({ isEnabled, serverid, userid, perms, handleClose, openProfile }
                           <p className="font-bold mt-2 text-center text-2xl w-fit text-red-300">{savingError}</p>  
                         ) : null }
                         {serverMembers?.map((member) => (
-                            <MemberRow key={member.id} id={member.id} username={member.name} tag={member.tag} openPermsSettings={() => {}} openProfile={(userid) => openProfile(userid)} isBanTab={false} showActionButtons={member.id != userid} onBanClick={() => handlePunish(member.id, "ban")} onKickClick={() => handlePunish(member.id, "kick")} />
+                            <MemberRow key={member.id} id={member.id} username={member.name} tag={member.tag} openPermsSettings={() => {alert("Not implemented")}} openProfile={(userid) => openProfile(userid)} isBanTab={false} showActionButtons={member.id != userid} onBanClick={() => handlePunish(member.id, "ban")} onKickClick={() => handlePunish(member.id, "kick")} />
                         ))}
                     </div>
 
@@ -234,7 +234,7 @@ export default ({ isEnabled, serverid, userid, perms, handleClose, openProfile }
                           <p className="font-bold mt-2 text-center text-2xl w-fit text-red-300">{savingError}</p>  
                         ) : null }
                         {serverBans?.map((member) => (
-                            <MemberRow key={member.id} id={member.id} username={member.name} tag={member.tag} openPermsSettings={() => {}} openProfile={() => openProfile(member.id)} isBanTab={true} showActionButtons={true} onUnbanClick={() => handleUnban(member.id)} />
+                            <MemberRow key={member.id} id={member.id} username={member.name} tag={member.tag} openPermsSettings={() => {alert("Not implemented")}} openProfile={() => openProfile(member.id)} isBanTab={true} showActionButtons={true} onUnbanClick={() => handleUnban(member.id)} />
                         ))}
                     </div>
                 ) : (
