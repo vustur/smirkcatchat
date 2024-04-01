@@ -38,22 +38,28 @@ export default ({ username, tag, id, openProfile, openPermsSettings, isBanTab, s
             {!isBanTab && showActionButtons && (
             <div className="flex flex-row-reverse w-full h-full">
                 <button
-                    className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-opacity-40 duration-200"
+                    className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-opacity-40 duration-200 items-center"
                     // onClick={change user perms?}
                 >
-                    ⚙️
+                    <Image src="/icons/settings.svg" width={28} height={28}
+                    className="p-auto m-auto"
+                    alt="Perms" title="Configure permissions"></Image>
                 </button>
                 <button
                     className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-red-600 duration-200"
                     onClick={() => onBanClick()}
                 >
-                    🔨
+                   <Image src="/icons/hammer.svg" width={28} height={28}
+                    className="p-auto m-auto"
+                    alt="Ban" title="Ban"></Image>
                 </button>
                 <button
                     className="text-center bg-zinc-700 w-12 h-12 mt-auto mb-auto rounded-2xl shadow-md ml-3 hover:shadow-xl hover:bg-red-600 duration-200"
                     onClick={() => onKickClick()}
                 >
-                    🥾
+                   <Image src="/icons/boot.svg" width={28} height={28}
+                    className="p-auto m-auto"
+                    alt="Kick" title="Kick"></Image>
                 </button>
             </div>
             ) || (isBanTab && showActionButtons && (

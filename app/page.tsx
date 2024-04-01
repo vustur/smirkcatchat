@@ -5,7 +5,9 @@ import Server from "./components/Server";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
 import ServerSettings from "./components/SettingsServer";
-import NewChannelPopup from "./components/newChannelPopup";
+import NewChannelPopup from "./components/NewChannelPopup";
+import CreateServerPopup from "./components/CreateServerPopup";
+import JoinServerPopup from "./components/JoinServerPopup";
 import React, { useState, useEffect, SetStateAction } from "react";
 import Image from "next/image";
 import axios from "axios";
@@ -29,6 +31,7 @@ export default function Home() {
   const [servers, setServers] = useState([])
   const [isMsgsLoading, setIsMsgsLoading] = useState(false)
   const [isChannelsLoading, setIsChannelsLoading] = useState(false)
+  const [isFullReloading, setIsFullReloading] = useState(false)
   const [selfName, setSelfName] = useState("")
   const [selfTag, setSelfTag] = useState("")
   const [selfBio, setSelfBio] = useState("")
@@ -37,6 +40,8 @@ export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isServerSettingsOpen, setIsServerSettingsOpen] = useState(false)
   const [isCreateChannelPopupOpen, setIsCreateChannelPopupOpen] = useState(false)
+  const [isCreateServerPopupOpen, setIsCreateServerPopupOpen] = useState(false)
+  const [isJoinServerPopupOpen, setIsJoinServerPopupOpen] = useState(false)
 
   const token = Cookies.get('token')
 
@@ -149,35 +154,37 @@ export default function Home() {
     };
   }, [currChannelId]);
 
+  const fetchChannels = async () => {
+    try {
+      setIsChannelsLoading(true)
+      const response = await axios.post("./api/fetchChannels", { id: currServerId });
+      setChannels(response.data);
+      console.log('succ fetchChannels:');
+      console.log(response.data);
+    } catch (error) {
+      setChannels([]);
+      console.error('Channel fetch error - ', error);
+    }
+    setIsChannelsLoading(false)
+  };
+  
   useEffect(() => {
-    const fetchChannels = async () => {
-      try {
-        setIsChannelsLoading(true)
-        const response = await axios.post("./api/fetchChannels", { id: currServerId });
-        setChannels(response.data);
-        console.log('succ fetchChannels:');
-        console.log(response.data);
-      } catch (error) {
-        setChannels([]);
-        console.error('Channel fetch error - ', error);
-      }
-      setIsChannelsLoading(false)
-    };
     fetchChannels();
   }, [currServerId]);
 
+  const fetchServers = async () => {
+    try {
+      const response = await axios.post("./api/fetchServers", {token: token});
+      setServers(response.data);
+      console.log('succ fetchServers:');
+      console.log(response.data);
+    } catch (error) {
+      setServers([]);
+      console.error('Server fetch error - ', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchServers = async () => {
-      try {
-        const response = await axios.post("./api/fetchServers", {token: token});
-        setServers(response.data);
-        console.log('succ fetchServers:');
-        console.log(response.data);
-      } catch (error) {
-        setServers([]);
-        console.error('Server fetch error - ', error);
-      }
-    };
     fetchServers();
   }, [currServerId]);
 
@@ -278,10 +285,43 @@ export default function Home() {
       }
       setIsCreateChannelPopupOpen(false)
       await axios.post("./api/createChannel", { token, serverid: currServerId, name })
+      await fetchChannels();
     }
     catch (error) {
       console.error("Create channel error - ", error.message);
     }
+  }
+
+  const handleCreateServer = async (name) => {
+    try {
+      await axios.post("./api/createServer", { token, name })
+      await fetchServers();
+      setIsCreateChannelPopupOpen(false)
+    }
+    catch (error) {
+      console.error("Create server error - ", error.message);
+    }
+  }
+
+  const handleJoinServer = async (link) => {
+    try {
+      await axios.post("./api/joinServerByLink", { token, link })
+      await fetchServers();
+      setIsCreateChannelPopupOpen(false)
+    }
+    catch (error) {
+      console.error("Create server error - ", error.message);
+    }
+  }
+
+  const handleRefresh = async () => {
+    if (isFullReloading) {
+      return
+    }
+    setIsFullReloading(true)
+    await fetchServers();
+    await fetchChannels();
+    setIsFullReloading(false)
   }
 
   return (
@@ -309,6 +349,13 @@ export default function Home() {
             <p className="text-zinc-500 absolute pt-8 font-semibold bottom-1/4 text-xl left-[10%] text-center select-none">No servers... join or create one!</p>
           )
           }
+          { /* TODO: Make it as icon */ }
+          <button className="mx-auto block mt-3 text-white font-semibold"
+            onClick={() => handleRefresh()}
+            title={"Refresh server and channel lists \nКостыль, will be removed in future"}
+            >
+            Refresh
+          </button>
         </div>
         <div className="w-3/12 lg:w-2/12 min-w-52 bg-zinc-700 shadow-2xl flex flex-col">
           <div className="text-white text-center font-bold bg-zinc-600/40 w-full h-12 shadow-lg mb-3 pt-2 hover:cursor-pointer"
@@ -335,7 +382,7 @@ export default function Home() {
             <p className="text-zinc-500 pt-8 font-semibold bottom-1/4 text-xl text-center select-none">No channels to display? <br></br>Weird...</p>
           )
           }
-          { currServerId != 0 && !isChannelsLoading && currPerms != null && (currPerms['mng_chnls'] == 1 || currPerms['owner_perm'] == 1) ? (
+          { currServerId != 0 && !isChannelsLoading && currPerms != null && (currPerms['mng_chnls'] == 1 || currPerms['owner_perm'] == 1)? (
             <button className="w-full h-12 text-zinc-500 text-xl font-semibold hover:cursor-pointer"
             onClick={() => setIsCreateChannelPopupOpen(true)}
             >+ Create channel</button>
@@ -372,10 +419,14 @@ export default function Home() {
                 >
                 <Image src="/icons/door.svg" width={30} height={30} alt="door" title="Logout"></Image>
               </button>
-              <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1">
-                <Image src="/icons/hand.svg" width={30} height={30} alt="hand" title="Add friend"></Image>
+              <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
+              onClick={() => setIsJoinServerPopupOpen(true)}
+              >
+                <Image src="/icons/hand.svg" width={30} height={30} alt="hand" title="Join server"></Image>
               </button>
-              <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1">
+              <button className="w-10 h-10 ml-2 bg-zinc-600 rounded-lg text-white p-1"
+              onClick={() => setIsCreateServerPopupOpen(true)}
+              >
                 <Image src="/icons/plus.svg" width={30} height={30} alt="plus" title="Create server"></Image>
               </button>
               <p className="text-zinc-500 ml-2 mt-1 text-2xl">|</p>
@@ -422,7 +473,7 @@ export default function Home() {
               onChange={(e) => setMsgInput(e.target.value)}
               className="h-full flex-grow bg-zinc-500 rounded-lg mx-5 pl-2 text-white"
               type="text"
-              placeholder="Введите сообщение..."
+              placeholder="Write a message..."
               value={msgInput}
               onKeyDown={(e) => handleSendMsg(e)}
             />
@@ -433,6 +484,8 @@ export default function Home() {
       <Settings isEnabled={isSettingsOpen} username={selfName} tag={selfTag} bio={selfBio} handleClose={() => setIsSettingsOpen(false)}></Settings>
       <ServerSettings isEnabled={isServerSettingsOpen} serverid={currServerId} perms={currPerms} handleClose={() => setIsServerSettingsOpen(false)} openProfile={(userid) => handleProfileOpen(userid)} userid={selfId}></ServerSettings>
       <NewChannelPopup isEnabled={isCreateChannelPopupOpen} handleClose={() => setIsCreateChannelPopupOpen(false)} handleConfirm={(name) => handleCreateChannel(name)}></NewChannelPopup>
+      <CreateServerPopup isEnabled={isCreateServerPopupOpen} handleClose={() => setIsCreateServerPopupOpen(false)} handleConfirm={(name) => handleCreateServer(name)}></CreateServerPopup>
+      <JoinServerPopup isEnabled={isJoinServerPopupOpen} handleClose={() => setIsJoinServerPopupOpen(false)} handleConfirm={(link) => handleJoinServer(link)}></JoinServerPopup>
     </div>
   );
 }

@@ -80,9 +80,11 @@ export default ({ isEnabled, username, tag, bio, handleClose }: Props) => {
 
     return (
         <div className="absolute w-full h-full backdrop-blur-sm bg-t flex flex-row items-center bg-black/40">
-            <div className="z-10 w-3/4 h-[90%] left-[13%] absolute flex flex-col bg-zinc-600 rounded-lg shadow-xl text-white overflow-scroll">
-            <button className="text-zinc-500 font-semibold text-2xl text-right mr-2 mt-3" onClick={() => handleClose()}>❌</button>
-            <div className="flex flex-row-reverse h-full">
+            <div className="z-10 w-3/4 h-[90%] left-[13%] absolute flex flex-col bg-zinc-600 rounded-lg shadow-xl text-white">
+            <button className="text-zinc-500 font-semibold text-2xl text-right mr-2 mt-2 absolute right-[-6%]" onClick={() => {handleClose()}}>
+                <Image src="/icons/close.svg" width={30} height={30} alt="Close" title="Close"></Image>
+            </button>
+            <div className="flex flex-row-reverse h-full overflow-scroll">
                 { settingId === 1 ? (
                     // Account edit
                     <div className="flex flex-col items-center mx-5 mt-2 mb-5 bg-zinc-700 rounded-md shadow-lg w-[75%]">
