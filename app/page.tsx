@@ -322,6 +322,7 @@ export default function Home() {
     await fetchServers();
     await fetchChannels();
     setIsFullReloading(false)
+    await setCurrChannelId(0)
   }
 
   return (
@@ -466,7 +467,7 @@ export default function Home() {
         </div>
       </div>
       <Settings isEnabled={isSettingsOpen} username={selfName} tag={selfTag} bio={selfBio} handleClose={() => setIsSettingsOpen(false)}></Settings>
-      <ServerSettings isEnabled={isServerSettingsOpen} serverid={currServerId} perms={currPerms} handleClose={() => setIsServerSettingsOpen(false)} openProfile={(userid) => handleProfileOpen(userid)} userid={selfId}></ServerSettings>
+      <ServerSettings isEnabled={isServerSettingsOpen} serverid={currServerId} perms={currPerms} handleClose={() => setIsServerSettingsOpen(false)} openProfile={(userid) => handleProfileOpen(userid)} userid={selfId} onLeave={() => handleRefresh()}></ServerSettings>
       <NewChannelPopup isEnabled={isCreateChannelPopupOpen} handleClose={() => setIsCreateChannelPopupOpen(false)} handleConfirm={(name) => handleCreateChannel(name)}></NewChannelPopup>
       <CreateServerPopup isEnabled={isCreateServerPopupOpen} handleClose={() => setIsCreateServerPopupOpen(false)} handleConfirm={(name) => handleCreateServer(name)}></CreateServerPopup>
       <JoinServerPopup isEnabled={isJoinServerPopupOpen} handleClose={() => setIsJoinServerPopupOpen(false)} handleConfirm={(link) => handleJoinServer(link)}></JoinServerPopup>

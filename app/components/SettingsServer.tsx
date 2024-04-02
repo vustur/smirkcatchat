@@ -3,6 +3,7 @@ import MemberRow from "./MemberInServSett";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from 'js-cookie'
+import IconButton from "./IconButton";
 
 type Props = {
     isEnabled: boolean
@@ -11,9 +12,10 @@ type Props = {
     perms: any
     handleClose: () => void
     openProfile: (userid: number) => void
+    onLeave: () => void
 }
 
-export default ({ isEnabled, serverid, userid, perms, handleClose, openProfile }: Props) => {
+export default ({ isEnabled, serverid, userid, perms, handleClose, openProfile, onLeave }: Props) => {
     const [settingId, setSettingId] = useState(1);
     const [savingError, setSavingError] = useState("");
     const [serverName, setServerName] = useState("Loading...");
@@ -148,6 +150,18 @@ export default ({ isEnabled, serverid, userid, perms, handleClose, openProfile }
         return null;
     }
 
+    const handleLeave = async () => {
+        await axios.post("./api/leaveServer", { serverid: serverid, token: Cookies.get('token') })
+        .catch((error) => {
+            console.error('Leave error - ',);
+            console.log(error);
+            setSavingError("Error while trying to leave server " + serverid);
+        });
+        console.log("Left server " + serverid);
+        handleClose();
+        onLeave();
+    }
+
     return (
         <div className="absolute w-full h-full backdrop-blur-sm bg-t flex flex-row items-center bg-black/40">
             <div className="z-10 w-3/4 h-[90%] left-[13%] absolute flex flex-col bg-zinc-600 rounded-lg shadow-xl text-white">
@@ -260,6 +274,14 @@ export default ({ isEnabled, serverid, userid, perms, handleClose, openProfile }
                         >Bans
                     </button>
                       ) : null}
+                    { perms['owner_perm'] == 0 ? (
+                    <div className="flex flex-row justify-center pt-3">
+                        <div className="flex items-center">
+                            <IconButton scr="/icons/door.svg" onClick={() => handleLeave()} alt="Leave Server" title="Leave" hoverClr="red"></IconButton>
+                        </div>
+                    </div>
+                    ) : null
+                    }
                 </div>
             </div>
             </div>
