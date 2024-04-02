@@ -32,7 +32,7 @@ DB_DATABASE= *database name*
 DB_USER= *user*
 DB_PASSWORD= *password*
 ```
-4. Import `base.sql` to database
+4. Import `base.sql` to database (MariaDB recommended!)
 5. `npm run dev`
 6. Go to `localhost:3000`
 7. Have fun!
