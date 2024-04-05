@@ -21,7 +21,7 @@ export default async function handler(req: Request, res: Response) {
     if (serverChannels.length >= 20) {
         throw new Error("Server has too much channels");
     }
-    await dbPost("INSERT INTO channels (serverid, name) VALUES (?, ?)", [serverid, name]);
+    await dbPost("INSERT INTO channels (serverid, name, description) VALUES (?, ?, ?)", [serverid, name, "This is new channel"]);
     res.status(200).json({ "result": "success" });
   }
   catch (error) {

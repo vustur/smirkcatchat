@@ -1,40 +1,41 @@
-# Smirkcatchat 😼
+## Smirkcatchat 😼
 
 ### Features
 
-* [X] Login and signup pages
-* [X] Servers and channels
-* [X] Realtime chat
-* [X] Account settings (no profile avatar change)
-* [X] Server settings (no leave)
-* [ ] Channel management (only channel creation)
-* [ ] Permissions (no ability to edit permissions)
-* [ ] Security
-* [X] Moderation (ban and kick)
-* [X] Profile view (no permissions buttons like ban, kick, etc)
+*   Login and signup pages
+*   Servers and channels
+*   Realtime chat
+*   Account settings (no profile avatar change)
+*   Server settings (no leave)
+*   Channel management (only channel creation)
+*   Permissions (no ability to edit permissions)
+*   Security
+*   Moderation (ban and kick)
+*   Profile view (no permissions buttons like ban, kick, etc)
 
 ### Why you should use smirkcatchat instead of discord/slack/revolt??
 
-1. 99% of app made using arch (only two lines in windows!!)
-2. Typescript and tailwind for everything!! (idk differences between ts and js but denisc forced me to use ts)
-3. Created just for fun
+1.  99% of app made using arch (only two lines in windows!!)
+2.  Typescript and tailwind for everything!! (idk differences between ts and js but denisc forced me to use ts)
+3.  Created just for fun
 
 ### How to use
 
-1. Clone repo
-2. Create `.env.local` in the root of the project
-3. Edit it like this:
+1.  Clone repo
+2.  Create `.env.local` in the root of the project
+3.  Edit it like this:
 
-```
+```plaintext
 DB_HOST= *host, example: localhost*
 DB_PORT= 3306
 DB_DATABASE= *database name*
 DB_USER= *user*
 DB_PASSWORD= *password*
 ```
-4. Import `base.sql` to database
-5. `npm run dev`
-6. Have fun!
+
+1.  Import `base.sql` to database
+2.  `npm run dev`
+3.  Have fun!
 
 ### Other
 

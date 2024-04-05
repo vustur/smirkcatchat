@@ -3,7 +3,7 @@ CREATE TABLE `channels` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `serverid` int(11) NOT NULL,
   `name` text NOT NULL,
-  `description` text NOT NULL DEFAULT 'This is new channel',
+  `description` text NOT NULL,
   `config` text DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
@@ -31,9 +31,9 @@ DROP TABLE IF EXISTS `servers`;
 CREATE TABLE `servers` (
   `serverid` int(11) NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
-  `description` text NOT NULL DEFAULT 'This server has no description',
-  `members` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]',
-  `bans` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '[]',
+  `description` text NOT NULL,
+  `members` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `bans` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `link` text DEFAULT NULL,
   PRIMARY KEY (`serverid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
