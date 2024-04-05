@@ -6,11 +6,11 @@
 *   Servers and channels
 *   Realtime chat
 *   Account settings (no profile avatar change)
-*   Server settings (no leave)
+*   Server settings
 *   Channel management (only channel creation)
 *   Permissions (no ability to edit permissions)
 *   Security
-*   Moderation (ban and kick)
+*   Moderation (ban and kick in server settings)
 *   Profile view (no permissions buttons like ban, kick, etc)
 
 ### Why you should use smirkcatchat instead of discord/slack/revolt??
@@ -35,7 +35,8 @@ DB_PASSWORD= *password*
 
 1.  Import `base.sql` to database
 2.  `npm run dev`
-3.  Have fun!
+3.  Go to `localhost:3000`
+4.  Have fun!
 
 ### Other
 
