@@ -2,16 +2,16 @@
 
 ### Features
 
-*   Login and signup pages
-*   Servers and channels
-*   Realtime chat
-*   Account settings (no profile avatar change)
-*   Server settings
-*   Channel management (only channel creation)
-*   Permissions (no ability to edit permissions)
-*   Security
-*   Moderation (ban and kick in server settings)
-*   Profile view (no permissions buttons like ban, kick, etc)
+* [X] Login and signup pages
+* [X] Servers and channels
+* [X] Realtime chat
+* [X] Account settings (no profile avatar change)
+* [X] Server settings (no leave)
+* [ ] Channel management (only channel creation)
+* [ ] Permissions (no ability to edit permissions)
+* [ ] Security
+* [X] Moderation (ban and kick)
+* [X] Profile view (no permissions buttons like ban, kick, etc)
 
 ### Why you should use smirkcatchat instead of discord/slack/revolt??
 
